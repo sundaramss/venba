@@ -1,0 +1,6 @@
+**/.DS_Store
+**/*.log
+**/target
+**/*-init.clj
+yappu-illakkanam/resources/public/js/compiled
+**/out
