@@ -82,7 +82,5 @@
   (with-open [rdr (io/reader input-file)]
    (let [lines (line-seq rdr)]
     (dorun
-     (map #(prn %)
+     (map #(write-kural %)
           (map prepare-json-kural-extra lines))))))
-(defn t []
- (yappu/asaiPerkal "சேரா"))
