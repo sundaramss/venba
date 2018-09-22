@@ -1,4 +1,4 @@
-(ns yappu-illakkanam.subs
+(ns yappu-ilakkanam.subs
   (:require
    [re-frame.core :as re-frame]))
 

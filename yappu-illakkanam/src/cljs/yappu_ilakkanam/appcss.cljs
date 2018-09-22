@@ -1,4 +1,4 @@
-(ns yappu-illakkanam.appcss
+(ns yappu-ilakkanam.appcss
   (:require [cljss.reagent :as cr :refer-macros [defstyled]]))
 
 

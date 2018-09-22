@@ -1,4 +1,4 @@
-(ns yappu-illakkanam.components
+(ns yappu-ilakkanam.components
   (:require [reagent.core :as reagent]))
 
 ;; Form-1 component

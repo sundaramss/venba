@@ -1,12 +1,12 @@
-(ns yappu-illakkanam.core
+(ns yappu-ilakkanam.core
   (:require
    [reagent.core :as reagent]
    [re-frame.core :as re-frame]
    [cljss.core :as css]
-   [yappu-illakkanam.events :as events]
-   [yappu-illakkanam.routes :as routes]
-   [yappu-illakkanam.views :as views]
-   [yappu-illakkanam.config :as config]))
+   [yappu-ilakkanam.events :as events]
+   [yappu-ilakkanam.routes :as routes]
+   [yappu-ilakkanam.views :as views]
+   [yappu-ilakkanam.config :as config]))
 
 
 

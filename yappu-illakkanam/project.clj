@@ -1,4 +1,4 @@
-(defproject yappu-illakkanam "0.1.0-SNAPSHOT"
+(defproject yappu-ilakkanam "0.1.0-SNAPSHOT"
   :dependencies [[org.clojure/clojure "1.9.0"]
                  [org.clojure/clojurescript "1.10.339"]
                  [reagent "0.8.1"]
@@ -31,8 +31,8 @@
   {:builds
    [{:id           "dev"
      :source-paths ["src/cljs"]
-     :figwheel     {:on-jsload "yappu-illakkanam.core/mount-root"}
-     :compiler     {:main                 yappu-illakkanam.core
+     :figwheel     {:on-jsload "yappu-ilakkanam.core/mount-root"}
+     :compiler     {:main                 yappu-ilakkanam.core
                     :output-to            "resources/public/js/compiled/app.js"
                     :output-dir           "resources/public/js/compiled/out"
                     :asset-path           "js/compiled/out"
@@ -46,7 +46,7 @@
 
     {:id           "min"
      :source-paths ["src/cljs"]
-     :compiler     {:main            yappu-illakkanam.core
+     :compiler     {:main            yappu-ilakkanam.core
                     :output-to       "resources/public/js/compiled/app.js"
                     :optimizations   :advanced
                     :closure-defines {goog.DEBUG false}
@@ -54,7 +54,7 @@
 
     {:id           "test"
      :source-paths ["src/cljs" "test/cljs"]
-     :compiler     {:main          yappu-illakkanam.runner
+     :compiler     {:main          yappu-ilakkanam.runner
                     :output-to     "resources/public/js/compiled/test.js"
                     :output-dir    "resources/public/js/compiled/test/out"
                     :optimizations :none}}]})

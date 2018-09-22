@@ -1,1 +1,0 @@
-(ns yappu-illakkanam.core)

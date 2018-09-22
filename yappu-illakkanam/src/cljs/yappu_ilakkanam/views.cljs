@@ -1,8 +1,8 @@
-(ns yappu-illakkanam.views
+(ns yappu-ilakkanam.views
   (:require
    [re-frame.core :as re-frame]
-   [yappu-illakkanam.subs :as subs]
-   [yappu-illakkanam.appcss :refer [h1]]))
+   [yappu-ilakkanam.subs :as subs]
+   [yappu-ilakkanam.appcss :refer [h1]]))
 
 
 

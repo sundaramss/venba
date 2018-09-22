@@ -1,7 +1,7 @@
-(ns yappu-illakkanam.events
+(ns yappu-ilakkanam.events
   (:require
    [re-frame.core :as re-frame]
-   [yappu-illakkanam.db :as db]
+   [yappu-ilakkanam.db :as db]
    [day8.re-frame.tracing :refer-macros [fn-traced defn-traced]]))
 
 

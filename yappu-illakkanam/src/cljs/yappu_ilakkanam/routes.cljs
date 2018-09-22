@@ -1,4 +1,4 @@
-(ns yappu-illakkanam.routes
+(ns yappu-ilakkanam.routes
   (:require-macros [secretary.core :refer [defroute]])
   (:import goog.History)
   (:require
@@ -6,7 +6,7 @@
    [goog.events :as gevents]
    [goog.history.EventType :as EventType]
    [re-frame.core :as re-frame]
-   [yappu-illakkanam.events :as events]))
+   [yappu-ilakkanam.events :as events]))
 
 
 (defn hook-browser-navigation! []
