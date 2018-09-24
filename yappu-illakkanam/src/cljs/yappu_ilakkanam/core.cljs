@@ -5,6 +5,7 @@
    [cljss.core :as css]
    [yappu-ilakkanam.events :as events]
    [yappu-ilakkanam.routes :as routes]
+   [yappu-ilakkanam.appcss :as appcss]
    [yappu-ilakkanam.views :as views]
    [yappu-ilakkanam.config :as config]))
 
@@ -25,4 +26,5 @@
   (routes/app-routes)
   (re-frame/dispatch-sync [::events/initialize-db])
   (dev-setup)
-  (mount-root))
+  (mount-root)
+  (appcss/global-css))

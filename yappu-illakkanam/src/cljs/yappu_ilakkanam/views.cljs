@@ -2,19 +2,22 @@
   (:require
    [re-frame.core :as re-frame]
    [yappu-ilakkanam.subs :as subs]
-   [yappu-ilakkanam.appcss :refer [h1]]))
+   [yappu-ilakkanam.appcss :refer [H1 LOGO H-MENUS H-M-ROW H-MENU H-M-LINK]]))
 
+(defn header-link [title]
+ (H-MENU (H-M-LINK title)))
 
-
+(defn header-logo []
+ [:div [:div (H1 {:color :dark} "YAPPU")]
+    (H-MENUS
+     (H-M-ROW
+      (header-link "Home")
+      (header-link "About")
+      (header-link "Contact Us")))])
 ;; home
 
 (defn home-panel []
-  (let [name (re-frame/subscribe [::subs/name])]
-    [:div
-     [h1 {:size "32px" :color :dark :padding-v "8px" :padding-h "4px" :margin "8px 16px"} (str "Hello from " @name ". This is the Home Page.")]
-     [:div
-      [:a {:href "#/about"}
-       "go to About Page"]]]))
+  (header-logo))
 
 
 
