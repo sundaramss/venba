@@ -2,23 +2,30 @@
   (:require
    [re-frame.core :as re-frame]
    [yappu-ilakkanam.subs :as subs]
-   [yappu-ilakkanam.appcss :refer [H1 LOGO H-MENUS H-M-ROW H-MENU H-M-LINK]]))
+   [yappu-ilakkanam.appcss :refer [H1 H-MENUS H-M-ROW H-MENU H-M-LINK
+                                    CONTENT]]))
 
 (defn header-link [title]
- (H-MENU (H-M-LINK title)))
+ [:li {:class (H-MENU)}
+      [:a {:class (H-M-LINK)} title]])
 
-(defn header-logo []
- [:div [:div (H1 {:color :dark} "YAPPU")]
-    (H-MENUS
-     (H-M-ROW
-      (header-link "Home")
-      (header-link "About")
-      (header-link "Contact Us")))])
+(defn header []
+ [:div
+    (H1 {:color :dark} "YAPPU")
+    [:div {:class (H-MENUS)}
+     [:div {:class (H-M-ROW)}
+       (header-link "Home")
+       (header-link "About")
+       (header-link "Contact Us")]]])
 ;; home
 
-(defn home-panel []
-  (header-logo))
+(defn kural-content []
+  [:div {:class (CONTENT)}])
 
+(defn home-panel []
+  [:div
+    (header)
+    (kural-content)])
 
 
 ;; about
