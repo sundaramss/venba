@@ -19,6 +19,7 @@
 (defn mount-root []
   (re-frame/clear-subscription-cache!)
   (css/remove-styles!)
+  (appcss/global-css)
   (reagent/render [views/main-panel]
                   (.getElementById js/document "app")))
 
