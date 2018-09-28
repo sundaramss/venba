@@ -14,3 +14,8 @@
  ::set-active-panel
  (fn-traced [db [_ active-panel]]
    (assoc db :active-panel active-panel)))
+
+(re-frame/reg-event-db
+ ::set-selected-opt
+ (fn-traced [db [_ id value]]
+   (assoc-in db [:s id :opt] value)))
