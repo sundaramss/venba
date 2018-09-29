@@ -2,8 +2,8 @@
   (:require
    [re-frame.core :as re-frame]
    [yappu-ilakkanam.db :as db]
+   [yappu-ilakkanam.common :as common]
    [day8.re-frame.tracing :refer-macros [fn-traced defn-traced]]))
-
 
 (re-frame/reg-event-db
  ::initialize-db
@@ -18,4 +18,10 @@
 (re-frame/reg-event-db
  ::set-selected-opt
  (fn-traced [db [_ id value]]
-   (assoc-in db [:s id :opt] value)))
+   (let [idx (common/getOptIdx db id)
+         search (:s db)]
+     (assoc db :s (if (= value "0")
+                      (reduce conj (subvec search 0 idx) (subvec search (inc idx)))
+                      (if (nil? idx)
+                        (conj search {:id id :opt value})
+                        (update-in search [idx :opt] (fn [_] value))))))))

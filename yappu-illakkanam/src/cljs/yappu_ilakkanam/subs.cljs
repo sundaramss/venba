@@ -1,5 +1,6 @@
 (ns yappu-ilakkanam.subs
   (:require
+   [yappu-ilakkanam.common :as common]
    [re-frame.core :as re-frame]))
 
 (re-frame/reg-sub
@@ -15,4 +16,10 @@
 (re-frame/reg-sub
  ::selected-opt
  (fn [db [_ id]]
-   (get-in db [:s id :opt])))
+   (common/getOpt db id)))
+
+(re-frame/reg-sub
+ ::get-selected-opts
+ (fn [db [_]]
+   (let [opts (:s db)]
+    (map (fn [{opt :opt}] (map keyword (re-seq #".{1,2}" (or opt "")))) opts))))
