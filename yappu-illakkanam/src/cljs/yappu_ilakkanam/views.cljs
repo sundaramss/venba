@@ -1,11 +1,15 @@
 (ns yappu-ilakkanam.views
   (:require
    [re-frame.core :as re-frame]
+   [clojure.string :as cstr]
    [yappu-ilakkanam.common :as common]
    [yappu-ilakkanam.subs :as subs]
    [yappu-ilakkanam.events :as events]
+   [yappu-ilakkanam.routes :refer [set-hash!]]
    [yappu-ilakkanam.appcss :refer [H1 H-MENUS H-M-ROW H-MENU H-M-LINK
-                                   CONTENT FILTER-CONTAINER K-F-TITLE K-F-WRAPPER K-F-DROPDOWN K-F-SELECT]]))
+                                   CONTENT FILTER-CONTAINER K-F-TITLE K-F-WRAPPER K-F-DROPDOWN K-F-SELECT
+                                   CHIP C-CHIP P-C-CHIP CROSS EN
+                                   KURALS KURAL-LIST KURAL KURAL-PATH KURAL-PATH-C K-P-ITEM K-ADI K-ADI-1 K-ADI-2 K-A-S-1 K-A-SEER]]))
 
 (defn header-link [title]
  [:li {:class (H-MENU)}
@@ -37,16 +41,23 @@
 
 (defn show-selected-opt []
   (let [opts @(re-frame/subscribe [::subs/get-selected-opts])]
-   (reduce #(conj %1 [:span (common/asai-seer %2)]) [:p] opts)))
-
+   (reduce #(conj %1 [:li {:class (CHIP)}
+                      [:span {:class (EN)} (%2 :id)]
+                      [:span (common/asai-seer (%2 :val))]
+                      [:button {:class (CROSS)
+                                :on-click (fn [e]
+                                           (re-frame/dispatch [::events/set-selected-opt (%2 :id) "0"]))}
+                             "x"]])
+          [:ul {:class (C-CHIP)}] opts)))
    ;(map #([:span (apply str %)]) opts)))
 
-(defn kural-content []
+(defn kural-filter []
   [:div {:class (CONTENT)}
     [:div {:class (FILTER-CONTAINER)}
      [:div {:class (K-F-WRAPPER)}
-       [:h2 {:class (K-F-TITLE)} "தேடு"]
-       [show-selected-opt]
+       [:div {:class (P-C-CHIP)}
+        [:h2 {:class (K-F-TITLE)} "தேடு"]
+        [show-selected-opt]]
        [:div {:class (K-F-DROPDOWN)}
            [filter-option 1 [5 7 8]]]
        [:div {:class (K-F-DROPDOWN)}
@@ -62,11 +73,62 @@
        [:div {:class (K-F-DROPDOWN)}
            [filter-option 7 [5 9 10 16 30]]]]]])
 
+(defn kural-path-view [{pal :pal iyal :iyal adhikaram :adhikaram}]
+  [:div {:class (KURAL-PATH) :key :pia}
+    [:span {:class (K-P-ITEM)} pal]
+    [:span {:class (K-P-ITEM)} (str ">" iyal)]
+    [:span {:class (K-P-ITEM)} (str ">" adhikaram)]])
+
+(defn adi-view [n idx v]
+   [:span {:class (K-A-SEER (= idx 0)) :key (str "ad" idx n)} (cstr/join "/" v)])
+
+(defn asai-view [n idx v]
+   [:span {:class (K-A-S-1 (= idx 0)) :key (str "as" idx n)} (cstr/join "/" (map #((keyword %) common/asai) v))])
+
+(defn seer-view [n idx v]
+ (let [sf (if (and (= n 1) (= idx 2)) common/etru-seer common/asai-seer)]
+   [:span {:class (K-A-S-1 (= idx 0)) :key (str "as" idx n)} (sf (map #(keyword %) v))]))
+
+(defn kural-adi-view [n sp]
+ (let [adi (get sp n)]
+  [[:div {:class (K-ADI) :key n}]
+   (concat []
+     (map-indexed #(adi-view n %1 %2) adi))]))
+
+(defn kural-asai-view [n ap]
+ (let [adi (get ap n)]
+   [[:div {:class (K-ADI-1) :key (str "as" n)}
+     (concat []
+       (map-indexed #(asai-view n %1 %2) adi))]]))
+
+(defn kural-seer-view [n ap]
+ (let [adi (get ap n)]
+   [[:div {:class (K-ADI-2) :key (str "ase" n)}
+     (concat []
+       (map-indexed #(seer-view n %1 %2) adi))]]))
+
+(defn k-v [x k]
+ (concat []
+      (kural-adi-view x (:sp k))
+      (kural-asai-view x (:ap k))
+      (kural-seer-view x (:ap k))))
+
+(defn kural-adhikaram-list []
+  [:div {:class (KURALS)}
+    [:div {:class (KURAL-LIST)}
+     [:div {:class (KURAL)}
+      (let [k @(re-frame/subscribe [::subs/get-kural])
+            pcount (count (:sp k))]
+       [:div {:class (KURAL-PATH-C)}
+         [kural-path-view k]
+         (for [x (range pcount)]
+             (k-v x k))])]]])
 
 (defn home-panel []
   [:div
     (header)
-    (kural-content)])
+   (kural-filter)
+   (kural-adhikaram-list)])
 
 
 ;; about
@@ -84,13 +146,18 @@
 
 (defn- panels [panel-name]
   (case panel-name
-    :home-panel [home-panel]
+    :kural-panel [home-panel]
     :about-panel [about-panel]
     [:div]))
+
+(defn- init-re-load []
+  (let [path @(re-frame/subscribe [::subs/load-path])]
+   (when (not-empty path) (set-hash! path))))
 
 (defn show-panel [panel-name]
   [panels panel-name])
 
 (defn main-panel []
   (let [active-panel (re-frame/subscribe [::subs/active-panel])]
+    (init-re-load)
     [show-panel @active-panel]))

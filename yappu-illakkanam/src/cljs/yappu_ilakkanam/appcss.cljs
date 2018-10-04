@@ -45,6 +45,7 @@
 (defstyles K-F-TITLE []
  {
    :font "bold 24px monospace"
+   :float "left"
    :padding-left "10px"})
 
 (defstyles K-F-WRAPPER []
@@ -66,3 +67,110 @@
   :height "36px"
   :border (when borderColor
             (str "1px solid " borderColor))})
+
+(defstyles CHIP []
+ {:display "inline-block"
+  :padding "5px"
+  :padding-left "15px"
+  :padding-right "7.5px"
+  :background "#555"
+  :color "#fff"
+  :font-weight "bold"
+  :border-radius "15px 0 0 15px"
+  :position "relative"
+  :margin "0 16px"})
+
+(defstyles C-CHIP []
+ {:float "left"
+  :padding "8px 16px"})
+
+(defstyles P-C-CHIP []
+ {:width "100%" :float "left"})
+
+(defstyles EN []
+ {
+  :padding "2px 5px"
+   :background "#efefef"
+   :border-radius "8px"
+   :color "#555"
+   :margin-right "7px"
+   :display "inline-block"
+   :text-align "center"
+   :font-size "12px"})
+
+(defstyles CROSS []
+ {
+   :outline "none"
+   :background "#555"
+   :color "#fff"
+   :border "0"
+   :border-radius "0 15px 15px 0"
+   :padding "5px 10px"
+   :cursor "pointer"
+   :position "absolute"
+   :top "0"
+   :bottom "0"
+   :right "-25px"
+   :line-height "0.5"
+   :font-weight "bold"})
+
+(defstyles KURALS []
+  { :background "#fff"})
+
+(defstyles KURAL-LIST []
+  {
+    :margin "0 auto"})
+
+(defstyles KURAL []
+   {
+    :padding "24px"
+    :float "left"
+    :border-bottom "1px solid #f9f8f5"
+    :width "100%"
+    "&:nth-child(odd)" {:background "#f9f8f5"}})
+
+(defstyles KURAL-PATH-C []
+  {:padding "16px 0 0"})
+
+(defstyles KURAL-PATH []
+  { :min-width "150px"
+    :padding-bottom "6px"})
+
+(defstyles K-P-ITEM []
+  { :font-size "12px"
+    :color "#ad6e47"})
+
+(defstyles K-ADI []
+  { ;:float "left"
+    :display "table"})
+
+(defstyles K-ADI-1 []
+  { ;:float "left"
+    :display "table"})
+
+(defstyles K-ADI-2 []
+  { ;:float "left"
+    :display "table"
+    :padding-bottom "7px"})
+
+(defstyles K-A-SEER [f]
+ { :padding-right "36px"
+   :display "table-cell"
+   :border "1px solid #a0a0a0"
+   :padding "16px"
+   :width "132px"
+   :background "#fff"
+   :font-weight "bold"
+   :border-left (if-not f "0"
+                          "1px solid #a0a0a0")})
+
+(defstyles K-A-S-1 [f]
+ { :padding-right "36px"
+   :display "table-cell"
+   :padding "8px 16px"
+   :width "132px"
+   :background "#fff"
+   :border-bottom "1px dashed #a0a0a0"
+   :border-right "1px dashed #a0a0a0"
+   :border-left (if-not f "0"
+                          "1px dashed #a0a0a0")})
