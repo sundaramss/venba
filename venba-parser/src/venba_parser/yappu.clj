@@ -115,3 +115,12 @@
                       (osaikal-piri)
                       (asai-peeri)
                       (asaikal-name)))
+
+(defn invert-many-to-one
+  "returns a one-to-many mapping"
+  ([m] (invert-many-to-one #{} m))
+  ([to m]
+   (persistent!
+    (reduce (fn [m [k v]]
+              (assoc! m v (conj (get m v to) k)))
+            (transient {}) m))))
