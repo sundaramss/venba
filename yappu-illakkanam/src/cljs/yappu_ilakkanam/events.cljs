@@ -3,6 +3,8 @@
    [re-frame.core :as re-frame]
    [yappu-ilakkanam.db :as db]
    [yappu-ilakkanam.common :as common]
+   [day8.re-frame.http-fx]
+   [ajax.core :as ajax]
    [day8.re-frame.tracing :refer-macros [fn-traced defn-traced]]))
 
 (re-frame/reg-event-db
@@ -26,16 +28,59 @@
      (assoc db :load-path "kural/1")
      (-> db
       (assoc :s search)
-      (dissoc :kural-adhikaram)
+      (dissoc :kural-adhikaram :ar)
       (assoc :active-panel :kural-panel))))))
 
+;(defn- kural-filter-effect [id path]
+;  {:method :get
+;   :uri  (str "/kural/" path "/" id ".json")
+;   :response-format (ajax/json-response-format {:keywords? true})
+;   :on-success [:kural-filter-received id]
+;   :on-failure [:kural-filter-not-received id]})
+
+(defn- kural-req-effect [idx kid]
+   {:method :get
+    :uri  (str "/kural/extra/" kid ".json")
+    :response-format (ajax/json-response-format {:keywords? true})
+    :on-success [:kural-received idx kid]
+    :on-failure [:kural-not-received idx kid]})
+
+
 (re-frame/reg-event-db
- ::load-kural
+  :kural-received
+  (fn [db [_ idx id res]]
+    (update-in db [:fetchdata idx :padal] (fn [_] res))))
+
+
+(re-frame/reg-event-db
+  :kural-not-received
+  (fn [db [_ id res]]
+    (prn "Failure:" id res)
+    db))
+
+(def kural-fetch
+   (re-frame/->interceptor
+     :id :kural-fetch
+     :after (fn [context]
+              (let [ar (get-in context [:effects :db :ar])
+                    httpeffects (map-indexed kural-req-effect ar)]
+               (if (not-empty httpeffects)
+                   (assoc-in context [:effects :http-xhrio] httpeffects)
+                   context)))))
+
+(defn- prepare-fetchdata [krange]
+  (reduce (fn [r x] (conj r (assoc {} :id x :padal nil))) [] krange))
+
+(re-frame/reg-event-db
+ ::load-range-kural
+ [kural-fetch]
  (fn-traced [db [_ aidx]]
-  (let [idx (js/parseInt (or (not-empty (clojure.string/join (re-seq #"\d+" aidx))) "1"))]
+  (let [ sidx (dec aidx)
+         ar  (let [x (+ (* sidx 10) 1)] (range x (+ x 10)))]
    (-> db
     (assoc :s [])
-    (assoc :kural-adhikaram idx)
+    (assoc :kural-adhikaram aidx)
+    (assoc :ar ar :fetchdata (prepare-fetchdata ar))
     (assoc :active-panel :kural-panel)))))
 
 (re-frame/reg-event-db
@@ -50,3 +95,8 @@
                         (update-in search [idx :opt] (fn [_] value))))
          path (reduce (fn [r seer](str r "/" (:id seer) "/" (:opt seer))) "" nsearch)]
       (if (empty? path) (assoc db :load-path "/kural/1") (assoc db :load-path (str "/kural/s" path))))))
+
+(re-frame/reg-event-db
+ ::load-kural-panel
+ (fn-traced [db [_ active-panel]]
+   (assoc db :active-panel active-panel)))

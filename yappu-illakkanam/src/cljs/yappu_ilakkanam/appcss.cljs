@@ -127,7 +127,8 @@
     :float "left"
     :border-bottom "1px solid #f9f8f5"
     :width "100%"
-    "&:nth-child(odd)" {:background "#f9f8f5"}})
+    "&:nth-child(odd)" {:background "#f9f8f5"}
+    "&:nth-child(even)" {:background "#e6e6e6"}})
 
 (defstyles KURAL-PATH-C []
   {:padding "16px 0 0"})

@@ -26,15 +26,7 @@
 (re-frame/reg-sub
  ::get-kural
  (fn [db [_]]
-   {
-     :ve "1"
-     :ave "1"
-     :pal "அறத்துப்பால்"
-     :iyal "பாயிரம்"
-     :adhikaram "கடவுள் வாழ்த்து"
-     :sp [[ [ "அக" "ர"]  [ "முத" "ல"]  ["எழுத்" "தெல்" "லாம்"] ["ஆ" "தி"]]
-          [ ["பக" "வன்"] [ "முதற்" "றே"]  [ "உல" "கு"]]]
-     :ap [[[ "NI" "NE" ]["NI" "NE"]["NI" "NE" "NE" ] [ "NE" "NE" ]] [[ "NI" "NE" ] [ "NI" "NE" ] [ "NI" "NE"]]]}))
+   (db :fetchdata)))
 
 (re-frame/reg-sub
  ::get-selected-opts

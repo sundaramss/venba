@@ -3,6 +3,7 @@
                  [org.clojure/clojurescript "1.10.339"]
                  [reagent "0.8.1"]
                  [re-frame "0.10.5"]
+                 [day8.re-frame/http-fx "0.1.6"]
                  [secretary "1.2.3"]
                  [org.roman01la/cljss "1.6.3"]]
 

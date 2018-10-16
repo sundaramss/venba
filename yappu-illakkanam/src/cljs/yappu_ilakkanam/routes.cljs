@@ -19,7 +19,7 @@
     (.setEnabled true)))
 
 (defn set-hash! [loc]
-  (js/console.log "Set-Hash" loc) 
+  (js/console.log "Set-Hash" loc)
   (set! (.-hash js/window.location) loc))
 
 (defn app-routes []
@@ -32,8 +32,11 @@
 
   ;; define routes here
   (defroute "/kural/:aidx" [aidx]
-    (js/console.log "/kural/:aidx" aidx)
-    (re-frame/dispatch [::events/load-kural aidx]))
+   (let [idx (js/parseInt (or (not-empty (clojure.string/join (re-seq #"\d+" aidx))) "1"))
+         sidx (cond (>= 0 idx) 1 :else (mod idx 134))]
+    (if (= sidx idx)
+     (re-frame/dispatch [::events/load-range-kural sidx])
+     (set-hash! (str "/kural/" sidx)))))
 
   ;; define routes here
   (defroute "/kural/s/*p" [p]

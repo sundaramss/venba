@@ -51,6 +51,8 @@
           [:ul {:class (C-CHIP)}] opts)))
    ;(map #([:span (apply str %)]) opts)))
 
+(def dpOptions [5 6 7 8 9 10 11 12])
+
 (defn kural-filter []
   [:div {:class (CONTENT)}
     [:div {:class (FILTER-CONTAINER)}
@@ -59,25 +61,26 @@
         [:h2 {:class (K-F-TITLE)} "தேடு"]
         [show-selected-opt]]
        [:div {:class (K-F-DROPDOWN)}
-           [filter-option 1 [5 7 8]]]
+           [filter-option 1 dpOptions]]
        [:div {:class (K-F-DROPDOWN)}
-           [filter-option 2 [5 9 10 16 30]]]
+           [filter-option 2 dpOptions]]
        [:div {:class (K-F-DROPDOWN)}
-           [filter-option 3 [5 7 8]]]
+           [filter-option 3 dpOptions]]
        [:div {:class (K-F-DROPDOWN)}
-           [filter-option 4 [5 9 10 16 30]]]
+           [filter-option 4 dpOptions]]
        [:div {:class (K-F-DROPDOWN)}
-           [filter-option 5 [5 7 8]]]
+           [filter-option 5 dpOptions]]
        [:div {:class (K-F-DROPDOWN)}
-           [filter-option 6 [5 9 10 16 30]]]
+           [filter-option 6 dpOptions]]
        [:div {:class (K-F-DROPDOWN)}
            [filter-option 7 [5 9 10 16 30]]]]]])
 
-(defn kural-path-view [{pal :pal iyal :iyal adhikaram :adhikaram}]
-  [:div {:class (KURAL-PATH) :key :pia}
+(defn kural-path-view [{pal :pal iyal :iyal adhikaram :adhikaram} id]
+  [:div {:class (KURAL-PATH)}
     [:span {:class (K-P-ITEM)} pal]
-    [:span {:class (K-P-ITEM)} (str ">" iyal)]
-    [:span {:class (K-P-ITEM)} (str ">" adhikaram)]])
+    [:span {:class (K-P-ITEM)} (str " > " iyal)]
+    [:span {:class (K-P-ITEM)} (str " > " adhikaram)]
+    [:span {:class (K-P-ITEM)} (str " > " id)]])
 
 (defn adi-view [n idx v]
    [:span {:class (K-A-SEER (= idx 0)) :key (str "ad" idx n)} (cstr/join "/" v)])
@@ -113,16 +116,30 @@
       (kural-asai-view x (:ap k))
       (kural-seer-view x (:ap k))))
 
+(defn kural-one [{k :padal id :id}]
+  [:div {:class (KURAL) :key id}
+    [:div {:class (KURAL-PATH-C)}
+          (kural-path-view k id)
+          (for [x (range (count (:sp k)))]
+              (k-v x k))]])
+
+
 (defn kural-adhikaram-list []
   [:div {:class (KURALS)}
     [:div {:class (KURAL-LIST)}
-     [:div {:class (KURAL)}
-      (let [k @(re-frame/subscribe [::subs/get-kural])
-            pcount (count (:sp k))]
-       [:div {:class (KURAL-PATH-C)}
-         [kural-path-view k]
-         (for [x (range pcount)]
-             (k-v x k))])]]])
+      (let [klist @(re-frame/subscribe [::subs/get-kural])]
+         (map #(kural-one %1) klist))]])
+
+
+;(defn kural-adhikaram-list []
+; [:div {:class (KURALS)}
+;   [:div {:class (KURAL-LIST)}
+;    [:div {:class (KURAL)}
+;     (let [[k _] @(re-frame/subscribe [::subs/get-kural])]
+;      [:div {:class (KURAL-PATH-C)}
+;        [kural-path-view k]
+;        (for [x (range (count (:sp k)))]
+;            (k-v x k))])]]]))
 
 (defn home-panel []
   [:div

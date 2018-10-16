@@ -9,9 +9,10 @@
   "I don't do a whole lot ... yet."
   [& args]
   (println "Hello, World!")
-  ;(kural/kural-extra-data-setup "../data/kural.csv"))
+  (kural/kural-extra-data-setup "../data/kural.csv"))
   ;(kural/kural-data-setup "../data/kural.csv"))
-  (kural/kural-search-data "../data/kural.csv"))
+ ;(kural/kural-search-data "../data/kural.csv"))
+ ;(kural/kural-search-data-val "../data/kural.csv"))
  ;(let [kural (kural/parse-kural-record k1021)]
  ;  (prn str (kural/padal kural))))
   ;(prn (kural/cookup-search-data {} k)))

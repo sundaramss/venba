@@ -17,9 +17,9 @@
                  #{"NINE"} "பிறப்பு")] mudhal))
 
 (def seerkal {1 [:NE] 2 [:NI] 3 [:NE :NE] 4 [:NI :NE]
-              5 [:NE :NE] 6 [:NI :NE] 7 [:NI :NI] 8 [:NE :NI]
-              9  [:NE :NE :NE] 10 [:NE :NE :NI] 11 [:NI :NE :NE] 12 [:NI :NE :NI]
-              13 [:NI :NI :NE] 14 [:NI :NI :NI] 15 [:NE :NI :NE] 16 [:NE :NI :NI]
+              5 [:NE :NE] 6 [:NI :NE] 7 [:NE :NI] 8 [:NI :NI] 
+              9  [:NE :NE :NE] 10 [:NI :NE :NE] 11 [:NE :NI :NE] 12 [:NI :NI :NE]
+              13 [:NE :NE :NI] 14 [:NI :NE :NI] 15 [:NI :NI :NI] 16 [:NE :NI :NI]
               17 [:NE :NE :NE :NE] 18 [:NE :NE :NE :NI] 19 [:NE :NE :NI :NE]  20 [:NE :NE :NI :NI]
               21 [:NI :NE :NE :NE] 22 [:NI :NE :NE :NI] 23 [:NI :NE :NI :NE]  24 [:NI :NE :NI :NI]
               25 [:NE :NI :NE :NE] 26 [:NE :NI :NE :NI] 27 [:NE :NI :NI :NE]  28 [:NE :NI :NI :NI]

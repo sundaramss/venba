@@ -2,6 +2,7 @@
   (:require [venba-parser.common :as common]
             [venba-parser.yappu :as yappu]
             [clojure.string :as str]
+            [clojure.set :as cset]
             [clojure.java.io :as io]))
 
 (defn parse-kural-record [kurlrec]
@@ -106,7 +107,21 @@
        i (:ve p)]
   (reduce (partial x4 i) r ((comp x31 x3 x2 x1) d))))
 
+(defn countV [vm]
+   (reduce-kv (fn [r k v] (set (concat r (map read-string v)))) [] vm))
+
+(defn cookup-search-data-val [r]
+   (reduce-kv (fn [m k v] (assoc m k (sort (countV v)))) {} r))
+  ;(reduce-kv (fn [m k vm] (prn (str "***" k "***")) (assoc m k vm)) {} fdata)))
+
 (defn kural-search-data [input-file] ""
   (with-open [rdr (io/reader input-file)]
    (let [lines (line-seq rdr) r {}]
      (common/write-venba "test.json" (common/clj-to-json (reduce cookup-search-data r lines))))))
+
+(defn kural-search-data-val [input-file] ""
+  (with-open [rdr (io/reader input-file)]
+   (let [lines (line-seq rdr) r {}]
+     (common/write-venba "test-val.json" (-> (reduce cookup-search-data r lines)
+                                          (cookup-search-data-val)
+                                          (common/clj-to-json))))))
