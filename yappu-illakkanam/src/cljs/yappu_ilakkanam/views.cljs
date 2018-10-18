@@ -9,7 +9,8 @@
    [yappu-ilakkanam.appcss :refer [H1 H-MENUS H-M-ROW H-MENU H-M-LINK
                                    CONTENT FILTER-CONTAINER K-F-TITLE K-F-WRAPPER K-F-DROPDOWN K-F-SELECT
                                    CHIP C-CHIP P-C-CHIP CROSS EN
-                                   KURALS KURAL-LIST KURAL KURAL-PATH KURAL-PATH-C K-P-ITEM K-ADI K-ADI-1 K-ADI-2 K-A-S-1 K-A-SEER]]))
+                                   KURALS KURAL-LIST KURAL KURAL-PATH KURAL-PATH-C K-P-ITEM K-ADI K-ADI-1 K-ADI-2 K-A-S-1 K-A-SEER
+                                   UL-P UL-P-TOP UL-P-BOTTOM UL-LI-P UL-LI-A-P]]))
 
 (defn header-link [title]
  [:li {:class (H-MENU)}
@@ -25,16 +26,17 @@
        [header-link "Contact Us"]]]])
 ;; home
 (defn filter-option [id opts]
- (let [options (map (fn [s]
+ (let [seerfn (if (= id 7) common/etru-seer common/asai-seer)
+       options (map (fn [s]
                      (let [x (apply str (map name s))]
                       [:option
                         {:key x :value x}
-                        (common/asai-seer s)]))
+                        (seerfn s)]))
                 (map #(common/seerkal %) opts))
        dropdown (into [:select
                        {:class (K-F-SELECT)
                         :on-change #(re-frame/dispatch [::events/set-selected-opt id (-> % .-target .-value)])}
-                       [:option {:value 0} "சீர்"]] options)]
+                       [:option {:value 0} (str "சீர்-" id )]] options)]
   (fn []
    (let [field-value @(re-frame/subscribe [::subs/selected-opt id])]  ;(re-re-frame/subscribe [::subs/selected-opt id])]
       (update dropdown 1 #(assoc % :value (or field-value 0)))))))
@@ -51,7 +53,9 @@
           [:ul {:class (C-CHIP)}] opts)))
    ;(map #([:span (apply str %)]) opts)))
 
-(def dpOptions [5 6 7 8 9 10 11 12])
+(defn- drop-option [idx]
+ [:div {:class (K-F-DROPDOWN) :key idx}
+   [filter-option idx (if (= idx 7) [1 2 3 4] [5 6 7 8 9 10 11 12])]])
 
 (defn kural-filter []
   [:div {:class (CONTENT)}
@@ -60,20 +64,7 @@
        [:div {:class (P-C-CHIP)}
         [:h2 {:class (K-F-TITLE)} "தேடு"]
         [show-selected-opt]]
-       [:div {:class (K-F-DROPDOWN)}
-           [filter-option 1 dpOptions]]
-       [:div {:class (K-F-DROPDOWN)}
-           [filter-option 2 dpOptions]]
-       [:div {:class (K-F-DROPDOWN)}
-           [filter-option 3 dpOptions]]
-       [:div {:class (K-F-DROPDOWN)}
-           [filter-option 4 dpOptions]]
-       [:div {:class (K-F-DROPDOWN)}
-           [filter-option 5 dpOptions]]
-       [:div {:class (K-F-DROPDOWN)}
-           [filter-option 6 dpOptions]]
-       [:div {:class (K-F-DROPDOWN)}
-           [filter-option 7 [5 9 10 16 30]]]]]])
+       (map #(drop-option %) (range 1 8))]]])
 
 (defn kural-path-view [{pal :pal iyal :iyal adhikaram :adhikaram} id]
   [:div {:class (KURAL-PATH)}
@@ -123,29 +114,44 @@
           (for [x (range (count (:sp k)))]
               (k-v x k))]])
 
-
 (defn kural-adhikaram-list []
   [:div {:class (KURALS)}
     [:div {:class (KURAL-LIST)}
       (let [klist @(re-frame/subscribe [::subs/get-kural])]
          (map #(kural-one %1) klist))]])
 
+(defn adhikaram-href [value]
+ (if (nil? value) "" (str "#/kural/" value)))
 
-;(defn kural-adhikaram-list []
-; [:div {:class (KURALS)}
-;   [:div {:class (KURAL-LIST)}
-;    [:div {:class (KURAL)}
-;     (let [[k _] @(re-frame/subscribe [::subs/get-kural])]
-;      [:div {:class (KURAL-PATH-C)}
-;        [kural-path-view k]
-;        (for [x (range (count (:sp k)))]
-;            (k-v x k))])]]]))
+(defn kural-pagination []
+  [:ul {:class (UL-P)}
+   (let [pagination @(re-frame/subscribe [::subs/get-pagination])
+         ul-li-p (UL-LI-P)
+         activeF (UL-LI-A-P false)
+         activeT (UL-LI-A-P true)
+         {current :current previous :previous
+           next :next pages :pages} pagination
+         pval (when previous (dec current))
+         nval (when next (inc current))
+         litem (fn [value href & [label]]
+                 (if (nil? value) ""
+                  [:li {:class ul-li-p :key (or value label)}
+                   [:a {:class (if (= current value) activeT activeF) :href href} (or label value)]]))]
+        (concat [] [(litem pval (adhikaram-href (or pval "#")) "«")
+                    (map #(litem % (adhikaram-href %)) pages)
+                    (litem nval (adhikaram-href (or nval "#")) "»")]))])
+
 
 (defn home-panel []
+ (let [pagination (kural-pagination)]
   [:div
     (header)
-   (kural-filter)
-   (kural-adhikaram-list)])
+    [:div {:style {:position "relative"}}
+     (kural-filter)
+     [:div {:class (UL-P-TOP)} pagination]]
+    [:div {:style {:position "relative"}}
+     (kural-adhikaram-list)
+     [:div {:class (UL-P-BOTTOM)} pagination]]]))
 
 
 ;; about

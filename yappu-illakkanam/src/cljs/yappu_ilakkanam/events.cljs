@@ -38,7 +38,7 @@
 ;   :on-success [:kural-filter-received id]
 ;   :on-failure [:kural-filter-not-received id]})
 
-(defn- kural-req-effect [idx kid]
+(defn- kural-req-effect [idx {kid :id}]
    {:method :get
     :uri  (str "/kural/extra/" kid ".json")
     :response-format (ajax/json-response-format {:keywords? true})
@@ -62,25 +62,26 @@
    (re-frame/->interceptor
      :id :kural-fetch
      :after (fn [context]
-              (let [ar (get-in context [:effects :db :ar])
-                    httpeffects (map-indexed kural-req-effect ar)]
+              (let [fd (get-in context [:effects :db :fetchdata])
+                    httpeffects (map-indexed kural-req-effect fd)]
                (if (not-empty httpeffects)
                    (assoc-in context [:effects :http-xhrio] httpeffects)
                    context)))))
 
-(defn- prepare-fetchdata [krange]
-  (reduce (fn [r x] (conj r (assoc {} :id x :padal nil))) [] krange))
+(defn- prepare-fetchdata [sidx]
+ (let [krange  (let [x (+ (* sidx 10) 1)] (range x (+ x 10)))]
+  (reduce (fn [r x] (conj r (assoc {} :id x :padal nil))) [] krange)))
 
 (re-frame/reg-event-db
  ::load-range-kural
  [kural-fetch]
  (fn-traced [db [_ aidx]]
-  (let [ sidx (dec aidx)
-         ar  (let [x (+ (* sidx 10) 1)] (range x (+ x 10)))]
+  (let [ sidx (dec aidx)]
    (-> db
     (assoc :s [])
     (assoc :kural-adhikaram aidx)
-    (assoc :ar ar :fetchdata (prepare-fetchdata ar))
+    (assoc :fetchdata (prepare-fetchdata sidx))
+    (assoc :pagination (common/paginate {:records 1330 :per-page 10 :max-pages 7 :current aidx :biased :left}))
     (assoc :active-panel :kural-panel)))))
 
 (re-frame/reg-event-db

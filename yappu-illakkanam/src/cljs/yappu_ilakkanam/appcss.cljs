@@ -175,3 +175,42 @@
    :border-right "1px dashed #a0a0a0"
    :border-left (if-not f "0"
                           "1px dashed #a0a0a0")})
+(defstyles UL-P-TOP []
+ {
+  ;:padding "0px"
+  ;:margin "0px"
+  :position "absolute"
+  :display "inline-block"
+  :padding-left "27px"
+  :z-index 1})
+  ;:bottom "-37px"
+  ;:left "27px"})
+
+(defstyles UL-P-BOTTOM []
+ {
+  ;:padding "0px"
+  ;:margin "0px"
+  ;:position "absolute"
+  :display "inline-block"
+  :padding-left "27px"})
+  ;:bottom "-37px"
+  ;:left "27px"})
+
+(defstyles UL-P []
+  {
+    :display  "inline-block"
+    :background "#fff"
+    :border "1px solid #a0a0a0"})
+
+(defstyles UL-LI-P []
+  { :display  "inline-block"
+    :border-right "1px solid #a0a0a0";
+    "&:last-child" {:border-right "0px"}})
+
+(defstyles UL-LI-A-P [active]
+  { :color (if active "white" "black")
+    :background-color (when active "#ad6e47")
+    :display "block"
+    :padding "8px 16px"
+    :text-decoration "none"
+    :&:hover {:background-color (if active "#ad6e47" "#DDD")}})

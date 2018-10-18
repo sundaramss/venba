@@ -33,3 +33,8 @@
  (fn [db [_]]
    (let [opts (:s db)]
     (map (fn [{opt :opt id :id}] {:id id :val (map keyword (re-seq #".{1,2}" (or opt "")))}) opts))))
+
+(re-frame/reg-sub
+ ::get-pagination
+ (fn [db [_]]
+   (db :pagination)))
