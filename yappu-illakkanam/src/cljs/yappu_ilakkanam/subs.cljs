@@ -26,7 +26,7 @@
 (re-frame/reg-sub
  ::get-kural
  (fn [db [_]]
-   (db :fetchdata)))
+   (:fetchdata db)))
 
 (re-frame/reg-sub
  ::get-selected-opts
@@ -34,7 +34,14 @@
    (let [opts (:s db)]
     (map (fn [{opt :opt id :id}] {:id id :val (map keyword (re-seq #".{1,2}" (or opt "")))}) opts))))
 
+(defn- build-path [db]
+  (if (nil? (:s db))
+      db
+      (assoc db :searchPath (reduce (fn [r seer](str r "/" (:id seer) "/" (:opt seer))) "" (:s db)))))
+
 (re-frame/reg-sub
  ::get-pagination
  (fn [db [_]]
-   (db :pagination)))
+   (->  db
+      (build-path)
+      (select-keys  [:pagination :searchPage :searchPath]))))

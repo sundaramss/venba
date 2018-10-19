@@ -19,7 +19,6 @@
     (.setEnabled true)))
 
 (defn set-hash! [loc]
-  (js/console.log "Set-Hash" loc)
   (set! (.-hash js/window.location) loc))
 
 (defn app-routes []
@@ -39,8 +38,10 @@
      (set-hash! (str "/kural/" sidx)))))
 
   ;; define routes here
-  (defroute "/kural/s/*p" [p]
-    (re-frame/dispatch [::events/search-kural p]))
+  (defroute "/kural/s/*p" [p query-params]
+   (let [page (or (:p query-params) 1)]
+    (re-frame/dispatch [::events/search-kural p page]
+     (set-hash! (str "/kural/s/" p "?p=" page)))))
 
   (defroute "/about" []
     (re-frame/dispatch [::events/set-active-panel :about-panel]))

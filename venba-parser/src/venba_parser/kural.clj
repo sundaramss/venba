@@ -107,6 +107,13 @@
        i (:ve p)]
   (reduce (partial x4 i) r ((comp x31 x3 x2 x1) d))))
 
+(defn cookup-search-7data [r k]
+ (let [p (->> k (parse-kural-record) (padal))
+       d (:ap p)
+       i (:ve p)
+       eruthi (reduce str "" (map name (last (last d))))]
+   (x4 i r [eruthi 7])))
+
 (defn countV [vm]
    (reduce-kv (fn [r k v] (set (concat r (map read-string v)))) [] vm))
 
@@ -125,3 +132,21 @@
      (common/write-venba "test-val.json" (-> (reduce cookup-search-data r lines)
                                           (cookup-search-data-val)
                                           (common/clj-to-json))))))
+(defn- write-search-result [asai result]
+  (common/make-dir (str "extra" "\\" asai "\\1.json"))
+  (doseq [[seerid listValue] result]
+    (common/write-venba  (str "extra/" asai "/" seerid ".json") (common/clj-to-json listValue))))
+
+(defn kural-write-search-data-val [input-file] ""
+  (with-open [rdr (io/reader input-file)]
+   (let [lines (line-seq rdr) r {}
+         result (reduce cookup-search-data r lines)]
+     (doseq [[key value] result]
+         (write-search-result key value)))))
+
+(defn kural-write-search-7data-val [input-file] ""
+  (with-open [rdr (io/reader input-file)]
+   (let [lines (line-seq rdr) r {}
+         result (reduce cookup-search-7data r lines)]
+     (doseq [[key value] result]
+         (write-search-result key value)))))

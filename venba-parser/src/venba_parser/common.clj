@@ -3,7 +3,7 @@
 
 (defn make-dir [parents]
  "This will receive array and create nested directory except last item"
- (apply io/make-parents parents))
+ (io/make-parents parents))
 
 (defn clj-to-json [data] ""
  (json/write-str data))

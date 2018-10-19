@@ -45,7 +45,7 @@
   (let [opts @(re-frame/subscribe [::subs/get-selected-opts])]
    (reduce #(conj %1 [:li {:class (CHIP)}
                       [:span {:class (EN)} (%2 :id)]
-                      [:span (common/asai-seer (%2 :val))]
+                      [:span ((if (= (%2 :id) 7) common/etru-seer common/asai-seer) (%2 :val))]
                       [:button {:class (CROSS)
                                 :on-click (fn [e]
                                            (re-frame/dispatch [::events/set-selected-opt (%2 :id) "0"]))}
@@ -123,9 +123,15 @@
 (defn adhikaram-href [value]
  (if (nil? value) "" (str "#/kural/" value)))
 
+(defn search-href [path value]
+ (if (nil? path) "" (str "#/kural/s/" path "?p=" value)))
+
 (defn kural-pagination []
   [:ul {:class (UL-P)}
-   (let [pagination @(re-frame/subscribe [::subs/get-pagination])
+   (let [{pagination :pagination
+          searchPage :searchPage
+          searchPath :searchPath} @(re-frame/subscribe [::subs/get-pagination])
+         linkFn (if (nil? searchPage) adhikaram-href (partial search-href searchPath))
          ul-li-p (UL-LI-P)
          activeF (UL-LI-A-P false)
          activeT (UL-LI-A-P true)
@@ -133,13 +139,14 @@
            next :next pages :pages} pagination
          pval (when previous (dec current))
          nval (when next (inc current))
+         emptyPage? (not-empty pages)
          litem (fn [value href & [label]]
                  (if (nil? value) ""
                   [:li {:class ul-li-p :key (or value label)}
                    [:a {:class (if (= current value) activeT activeF) :href href} (or label value)]]))]
-        (concat [] [(litem pval (adhikaram-href (or pval "#")) "«")
-                    (map #(litem % (adhikaram-href %)) pages)
-                    (litem nval (adhikaram-href (or nval "#")) "»")]))])
+        (concat [] [(when emptyPage? (litem pval (linkFn (or pval "#")) "«"))
+                    (map #(litem % (linkFn %)) pages)
+                    (when emptyPage? (litem nval (linkFn (or nval "#")) "»"))]))])
 
 
 (defn home-panel []
