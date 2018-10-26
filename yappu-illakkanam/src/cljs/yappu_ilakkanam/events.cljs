@@ -63,13 +63,13 @@
 
 (defn- get-fetchdata [id coll]
  (let [kdata (take 10 (drop (* (dec id) 10) coll))]
-  (reduce (fn [r x] (conj r (assoc {} :id x :padal nil))) [] kdata)))
+  (reduce (fn [r x] (conj r {:id x :padal nil})) [] kdata)))
 
 (re-frame/reg-event-db
   :kural-filter-received
   [kural-fetch]
   (fn-traced [db [_ idx id res]]
-    (let [data (apply sorted-set (reduce #(conj %1 (js/parseInt %2 10)) #{} res))
+    (let [data (reduce #(conj %1 (js/parseInt %2 10)) (sorted-set) res)
           page (:searchPage db)
           updatedb (update-in db [:s idx :frecords] (fn [_] data))
           allloaded (every? #(false? (nil? (% :frecords))) (updatedb :s))
@@ -101,27 +101,16 @@
       (dissoc :kural-adhikaram :ar :fetchdata)
       (assoc :active-panel :kural-panel))))))
 
-
-;(defn- kural-filter-effect [id path]
-;  {:method :get
-;   :uri  (str "/kural/" path "/" id ".json")
-;   :response-format (ajax/json-response-format {:keywords? true})
-;   :on-success [:kural-filter-received id]
-;   :on-failure [:kural-filter-not-received id]})
-
-
 (re-frame/reg-event-db
   :kural-received
   (fn-traced [db [_ idx id res]]
     (update-in db [:fetchdata idx :padal] (fn [_] res))))
-
 
 (re-frame/reg-event-db
   :kural-not-received
   (fn [db [_ id res]]
     (prn "Failure:" id res)
     db))
-
 
 (defn- prepare-fetchdata [sidx]
  (let [krange  (let [x (+ (* sidx 10) 1)] (range x (+ x 10)))]
@@ -131,13 +120,15 @@
  ::load-range-kural
  [kural-fetch]
  (fn-traced [db [_ aidx]]
-  (let [ sidx (dec aidx)]
-   (-> db
-    (clear-search-data)
-    (assoc :kural-adhikaram aidx)
-    (assoc :fetchdata (prepare-fetchdata sidx))
-    (assoc :pagination (common/paginate {:records 1330 :per-page 10 :max-pages 7 :current aidx :biased :left}))
-    (assoc :active-panel :kural-panel)))))
+  (let [ sidx (dec aidx)
+         newdb (clear-search-data db)
+         fetchdata (prepare-fetchdata sidx)
+         pagination (common/paginate {:records 1330 :per-page 10 :max-pages 7 :current aidx :biased :left})]
+    (assoc newdb
+     :kural-adhikaram aidx
+     :fetchdata fetchdata
+     :pagination pagination 
+     :active-panel :kural-panel))))
 
 (re-frame/reg-event-db
  ::set-selected-opt
@@ -145,7 +136,7 @@
    (let [idx (common/getOptIdx db id)
          search (:s db)
          nsearch (if (= value "0")
-                     (reduce conj (subvec search 0 idx) (subvec search (inc idx)))
+                     (remove #(= id (:id %)) search)   ;(reduce conj (subvec search 0 idx) (subvec search (inc idx)))
                      (if (nil? idx)
                         (conj search {:id id :opt value})
                         (update-in search [idx :opt] (fn [_] value))))

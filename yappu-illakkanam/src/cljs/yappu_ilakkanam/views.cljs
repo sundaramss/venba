@@ -20,19 +20,17 @@
  [:div
     [H1 {:color :dark} "யாப்பு"]
     [:div {:class (H-MENUS)}
-     [:div {:class (H-M-ROW)}
-       [header-link "Home"]
-       [header-link "About"]
-       [header-link "Contact Us"]]]])
+     [:div {:class (H-M-ROW)}]]])
+       ;[header-link "Home"]
+       ;[header-link "About"]
+       ;[header-link "Contact Us"]]]])
 ;; home
 (defn filter-option [id opts]
  (let [seerfn (if (= id 7) common/etru-seer common/asai-seer)
-       options (map (fn [s]
-                     (let [x (apply str (map name s))]
-                      [:option
-                        {:key x :value x}
-                        (seerfn s)]))
-                (map #(common/seerkal %) opts))
+       xf  (comp (map common/seerkal)
+                 (map (fn [s] [s (apply str (map name s))]))
+                 (map (fn [[k v]] [:option {:key v :value v} (seerfn k)])))
+       options (transduce xf conj opts)
        dropdown (into [:select
                        {:class (K-F-SELECT)
                         :on-change #(re-frame/dispatch [::events/set-selected-opt id (-> % .-target .-value)])}
@@ -67,11 +65,10 @@
        (map #(drop-option %) (range 1 8))]]])
 
 (defn kural-path-view [{pal :pal iyal :iyal adhikaram :adhikaram} id]
-  [:div {:class (KURAL-PATH)}
-    [:span {:class (K-P-ITEM)} pal]
-    [:span {:class (K-P-ITEM)} (str " > " iyal)]
-    [:span {:class (K-P-ITEM)} (str " > " adhikaram)]
-    [:span {:class (K-P-ITEM)} (str " > " id)]])
+ (when-let [pal pal]
+  (let [path [pal iyal adhikaram id]]
+   [:div {:class (KURAL-PATH)}
+     [:span {:class (K-P-ITEM)} (cstr/join " > " path)]])))
 
 (defn adi-view [n idx v]
    [:span {:class (K-A-SEER (= idx 0)) :key (str "ad" idx n)} (cstr/join "/" v)])
@@ -83,29 +80,16 @@
  (let [sf (if (and (= n 1) (= idx 2)) common/etru-seer common/asai-seer)]
    [:span {:class (K-A-S-1 (= idx 0)) :key (str "as" idx n)} (sf (map #(keyword %) v))]))
 
-(defn kural-adi-view [n sp]
- (let [adi (get sp n)]
-  [[:div {:class (K-ADI) :key n}]
-   (concat []
-     (map-indexed #(adi-view n %1 %2) adi))]))
+(defn kural-view [data]
+ (let [[n p clz pkey view] data
+       adi (get p n)]
+   [:div {:class (clz) :key (str pkey n)}
+       (map-indexed #(view n %1 %2) adi)]))
 
-(defn kural-asai-view [n ap]
- (let [adi (get ap n)]
-   [[:div {:class (K-ADI-1) :key (str "as" n)}
-     (concat []
-       (map-indexed #(asai-view n %1 %2) adi))]]))
-
-(defn kural-seer-view [n ap]
- (let [adi (get ap n)]
-   [[:div {:class (K-ADI-2) :key (str "ase" n)}
-     (concat []
-       (map-indexed #(seer-view n %1 %2) adi))]]))
-
-(defn k-v [x k]
- (concat []
-      (kural-adi-view x (:sp k))
-      (kural-asai-view x (:ap k))
-      (kural-seer-view x (:ap k))))
+(defn- k-v [x k]
+ (map kural-view [[x (:sp k) K-ADI "" adi-view]
+                  [x (:ap k) K-ADI-1 "as" asai-view]
+                  [x (:ap k) K-ADI-2 "ser" seer-view]]))
 
 (defn kural-one [{k :padal id :id}]
   [:div {:class (KURAL) :key id}
