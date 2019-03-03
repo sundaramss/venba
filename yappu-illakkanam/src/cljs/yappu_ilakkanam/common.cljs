@@ -1,5 +1,7 @@
 (ns yappu-ilakkanam.common)
 
+(def avail #{"kural"})
+
 (defn getOpt [{search :s, :or {search []}} id]
   (some #(if (= (% :id) id) (% :opt)) search))
 
@@ -26,6 +28,7 @@
               29 [:NI :NI :NE :NE] 30 [:NI :NI :NE :NI] 31 [:NI :NI :NI :NE]  32 [:NI :NI :NI :NI]})
 
 (defn asai-seer [asaikal]
+ (if (empty? asaikal) ""
    (let [asaiJoin #(apply str (map name %))
          mudhal (condp contains? (asaiJoin (take 2 asaikal))
                  #{"NENE"} "தேமா"
@@ -44,7 +47,7 @@
                                  #{"NINE"} "நறும்பூ"
                                  #{"NINI"} "நறுநிழல்"
                                  #{"NENI"} "ந்தண்ணிழல்")))]
-       (str mudhal mudivu)))
+       (str mudhal mudivu))))
 (defn paginate
   "Returns data requred to render paginator."
   [{:keys [records per-page max-pages current biased] :or {per-page 10 max-pages 10 current 1 biased :left}}]
@@ -59,5 +62,17 @@
         end (inc (min total-pages (+ current (+ right-half (if (< virtual-start 1) (Math/abs (dec virtual-start)) 0)))))
         pages (range start end)
         previous (if (= (first pages) 1) false true)
-        next (if (= (last pages) total-pages) false true)] 
-    {:current current :pages pages :previous previous :next next}))
+        next (if (= (last pages) total-pages) false true)]
+    {:current current :pages pages :previous previous :next next :total-pages total-pages}))
+
+(defn padding [arr ct val]
+ (let [l (if (empty? arr) [val] arr)]
+    (first (partition ct ct (repeat val) l))))
+
+(defn find-cols-size [sp]
+ (let [maxColsRow (map count (apply max-key count sp))]
+  (reduce (fn [ac it]
+           (let [acCount (count ac)
+                 numIt (map count it)
+                 newIt (padding numIt acCount 0)]
+            (map #(if (> %1 %2) %1 %2) ac newIt))) maxColsRow sp)))

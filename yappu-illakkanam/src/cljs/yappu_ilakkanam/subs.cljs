@@ -29,6 +29,11 @@
    (:fetchdata db)))
 
 (re-frame/reg-sub
+ ::get-init
+ (fn [db [_]]
+   (:in db)))
+
+(re-frame/reg-sub
  ::get-selected-opts
  (fn [db [_]]
    (let [opts (:s db)]

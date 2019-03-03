@@ -4,14 +4,59 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, shrink-to-fit=no">
   <meta http-equiv="X-UA-Compatible" content="IE=11">
-  <link rel="shortcut icon" href="/images/global/favicon.png">
   <title>Yappu</title>
-
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700|Open+Sans:400,500,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" />
+  <link rel="stylesheet" href="css/app.css"/>
+  <!--link rel="stylesheet" href="css/debug.css"/-->
+  <style>
+    .is-margin-left {
+      margin-left: 1rem;
+    }
+    .grid > div {
+      display: table-cell;
+      vertical-align: top;
+    }
+    .grid {
+      padding: 2px 2px;
+      display: grid;
+      grid-gap: 1px;
+      grid-template-columns: repeat(4, auto);
+      width: 100%;
+    }
+    .grid > div {
+      padding: 10px;
+      font-size: 0.8rem;
+    }
+    .zero-border-width {
+      border-width: 0px;
+    }
+    @media screen and (min-width: 0px) and (max-width: 414px) {
+      .is-hidden-400px {
+        display: none!important;
+      }
+      .grid > div {
+        padding: 5px;
+        font-size: 0.6rem;
+      }
+      .mobile-font-size {
+        font-size: 0.6rem!important;
+      }
+    }
+    @media screen and (min-width: 414px) {
+      .is-hidden_mobile {
+          display: none!important;
+      }
+    }
+    @media screen and (min-width: 1024px) {
+      .grid > div {
+        font-size: 1rem;
+      }
+    }
+  </style>
   </head>
   <body>
-    <container id="app"></container>
+    <section id="app" class="section is-paddingless"></section>
     <script src="js/compiled/app.js"></script>
     <script>yappu_ilakkanam.core.init();</script>
   </body>

@@ -1,148 +1,209 @@
 (ns yappu-ilakkanam.views
   (:require
    [re-frame.core :as re-frame]
+   [reagent.core :as reagent]
    [clojure.string :as cstr]
    [yappu-ilakkanam.common :as common]
    [yappu-ilakkanam.subs :as subs]
    [yappu-ilakkanam.events :as events]
-   [yappu-ilakkanam.routes :refer [set-hash!]]
-   [yappu-ilakkanam.appcss :refer [H1 H-MENUS H-M-ROW H-MENU H-M-LINK
-                                   CONTENT FILTER-CONTAINER K-F-TITLE K-F-WRAPPER K-F-DROPDOWN K-F-SELECT
-                                   CHIP C-CHIP P-C-CHIP CROSS EN
-                                   KURALS KURAL-LIST KURAL KURAL-PATH KURAL-PATH-C K-P-ITEM K-ADI K-ADI-1 K-ADI-2 K-A-S-1 K-A-SEER
-                                   UL-P UL-P-TOP UL-P-BOTTOM UL-LI-P UL-LI-A-P]]))
+   [yappu-ilakkanam.routes :refer [set-hash!]]))
 
-(defn header-link [title]
- [:li {:class (H-MENU)}
-      [:a {:class (H-M-LINK)} title]])
-
+(defn padal-menu []
+  (fn []
+   [:nav.navbar.is-info
+    [:div.navbar-start
+     [:div.navbar-item.has-dropdown.is-hoverable.is-info
+      [:a.navbar-link "இ"]
+      [:div.navbar-dropdown
+       [:a.navbar-item "திருக்குறள்"]]]]]))
 (defn header []
- [:div
-    [H1 {:color :dark} "யாப்பு"]
-    [:div {:class (H-MENUS)}
-     [:div {:class (H-M-ROW)}]]])
-       ;[header-link "Home"]
-       ;[header-link "About"]
-       ;[header-link "Contact Us"]]]])
-;; home
-(defn filter-option [id opts]
- (let [seerfn (if (= id 7) common/etru-seer common/asai-seer)
+ (let [burgerClicked (reagent/atom false)
+       burgerHandler (fn [e] (reset! burgerClicked (not @burgerClicked)))]
+  (fn []
+   [:header.columns.has-background-info.is-vcentered.is-mobile
+    [:div.column.is-one-quarter-desktop.is-two-quarters-tablet.is-three-quarters-mobile
+     [:span.is-size-3 [:strong.has-text-white "யாப்பு"]]
+     [:span.has-text-white "- திருக்குறள்"]]
+    [:div.column.is-three-quarters.is-hidden-touch
+     [padal-menu]]
+    [:div.column.is-hidden-desktop
+     [:a.navbar-burger.burger
+      {:on-click burgerHandler,
+       :role "button"}
+      [:span {:aria-hidden "true"}]
+      [:span {:aria-hidden "true"}]
+      [:span {:aria-hidden "true"}]]]])))
+
+(defn new-filter-option [idx eruthiSeer]
+ (let [ opts (if (= idx eruthiSeer) [1 2 3 4] [5 6 7 8 9 10 11 12])
+       seerfn (if (= idx eruthiSeer) common/etru-seer common/asai-seer)
        xf  (comp (map common/seerkal)
                  (map (fn [s] [s (apply str (map name s))]))
-                 (map (fn [[k v]] [:option {:key v :value v} (seerfn k)])))
-       options (transduce xf conj opts)
-       dropdown (into [:select
-                       {:class (K-F-SELECT)
-                        :on-change #(re-frame/dispatch [::events/set-selected-opt id (-> % .-target .-value)])}
-                       [:option {:value 0} (str "சீர்-" id )]] options)]
+                 (map (fn [[k v]] [:option {:key v :value v} (seerfn k)])))]
+  (transduce xf conj opts)))
+
+(defn new-fitler [eruthiSeer]
+ (let [options7 (new-filter-option eruthiSeer eruthiSeer)
+       options (new-filter-option 1 eruthiSeer)
+       defaultValue7 (get-in options7 [0 1 :value])
+       defaultValue (get-in options [0 1 :value])
+       totalSeer eruthiSeer
+       selectedSeerIdx  (reagent/atom "1")
+       selectedSeer  (reagent/atom defaultValue)]
   (fn []
-   (let [field-value @(re-frame/subscribe [::subs/selected-opt id])]  ;(re-re-frame/subscribe [::subs/selected-opt id])]
-      (update dropdown 1 #(assoc % :value (or field-value 0)))))))
+    [:filter.is-vcentered.columns.is-gapless
+     [:div.column.is-1]
+     [:div.column.is-two-fifths-tablet.is-half-mobile
+      [:p.is-hidden-tablet.is-hidden_mobile.bd-notification.is-size-4.has-text-weight-semibold  "சல்லடை"]
+      [:div.columns.is-mobile.is-variable.is-1-tablet.is-1-mobile.is-vcentered
+       [:div.column]
+       [:div.column.is-hidden-400px
+         [:span.is-size-4.has-text-weight-semibold "சல்லடை"]]
+       [:div.column
+         [:div.field.has-addons
+           [:div.control.has-icons-left
+              [:div.select.is-rounded.is-size-7-mobile
+               [:select {:on-change #(reset! selectedSeerIdx (.. % -target -value))}
+                [:option {:selected true :value 1} "சீர் - 1"]
+                (for [x (range 2 (+ totalSeer 1))]
+                   ^{:key x}[:option {:value x} (str "சீர் - " x)])]
+               [:span.icon.is-small.is-left [:i.fa.fa-list-ol]]]]
+           [:div.control.has-icons-left
+             [:div.select.is-rounded.is-size-7-mobile
+              [(fn [id]
+                (let [is7Idx (= id (str eruthiSeer))]
+                 (reset! selectedSeer (if is7Idx defaultValue7 defaultValue))
+                 (into [:select {:on-change #(reset! selectedSeer (.. % -target -value))}]
+                  (if is7Idx options7 options)))) @selectedSeerIdx]
+              [:span.icon.is-small.is-left [:i.fa.fa-list]]]]]]
+       [:div.column
+         [:a.button {:on-click #(re-frame/dispatch [::events/set-selected-opt (js/parseInt @selectedSeerIdx) @selectedSeer])}
+          [:span.icon.is-small>i.fa.fa-search]]]]]])))
 
-(defn show-selected-opt []
-  (let [opts @(re-frame/subscribe [::subs/get-selected-opts])]
-   (reduce #(conj %1 [:li {:class (CHIP)}
-                      [:span {:class (EN)} (%2 :id)]
-                      [:span ((if (= (%2 :id) 7) common/etru-seer common/asai-seer) (%2 :val))]
-                      [:button {:class (CROSS)
-                                :on-click (fn [e]
-                                           (re-frame/dispatch [::events/set-selected-opt (%2 :id) "0"]))}
-                             "x"]])
-          [:ul {:class (C-CHIP)}] opts)))
-   ;(map #([:span (apply str %)]) opts)))
+(defn filter-tag [tag eruthiSeer]
+ (let [{id :id v :val} tag
+       is7Idx (= id eruthiSeer)
+       seerfn (if is7Idx common/etru-seer common/asai-seer)
+       value  (seerfn v)]
+  [:div.control
+   [:div.tags.has-addons
+    [:span.tag.is-dark id]
+    [:span.tag.is-warning.has-text-weight-semibold value]
+    [:a.tag.is-delete.has-background-link.has-text-white
+      {:on-click #(re-frame/dispatch [::events/set-selected-opt id "0"])}]]]))
 
-(defn- drop-option [idx]
- [:div {:class (K-F-DROPDOWN) :key idx}
-   [filter-option idx (if (= idx 7) [1 2 3 4] [5 6 7 8 9 10 11 12])]])
+(defn filter-tags [eruthiSeer]
+ (let [opts @(re-frame/subscribe [::subs/get-selected-opts])]
+  [:div.columns.is-gapless
+   [:div.column.is-1]
+   [:div.column.is-four-fifths
+    [:div.card
+       [:header.card-header.has-background-info
+        [:p.card-header-title.has-text-white "சிறப்பு"]
+        [:a.card-header-icon.has-text-white
+         {:href "#"}
+         (if (not-empty opts) [:span.icon.is-info [:i.fa.fa-trash]])]]
+       [:div.card-content
+        [:div.content
+          (if (empty? opts) "எதையும் தேர்வு செய்யவில்லை"
+           (into [:div.field.is-grouped.is-grouped-multiline] (map #(filter-tag % eruthiSeer) opts)))]]]]
+   [:div.column.is-1]]))
 
-(defn kural-filter []
-  [:div {:class (CONTENT)}
-    [:div {:class (FILTER-CONTAINER)}
-     [:div {:class (K-F-WRAPPER)}
-       [:div {:class (P-C-CHIP)}
-        [:h2 {:class (K-F-TITLE)} "தேடு"]
-        [show-selected-opt]]
-       (map #(drop-option %) (range 1 8))]]])
 
+(defn get-pagination [end current]
+ (cond
+  (or (< end current) (< current 1)) []
+  (<= (dec end) 4) (vec (range 1 (inc end)))
+  (>= 3 current) [1 2 3 4 nil end]
+  (< (- end 3) current) (into [1 nil] (range (- end 3) (inc end)))
+  :else [1 nil (dec current) current (inc current) nil end]))
+
+(defn adhikaram-href [padal value]
+ (if (nil? value) "" (str "#/" padal "/" value)))
+
+(defn search-href [padal path value]
+ (if (nil? path) "" (str "#/" padal "/s/" path "?p=" value)))
+
+(defn new-pagination [padal]
+ (let [{pagination :pagination
+        searchPage :searchPage
+        searchPath :searchPath} @(re-frame/subscribe [::subs/get-pagination])
+        {current :current endPage :total-pages} pagination
+        pagelist (get-pagination endPage current)
+        linkFn (if (nil? searchPage) (partial adhikaram-href padal) (partial search-href padal searchPath))]
+  [:div.columns.is-marginless.is-paddingless.is-gapless
+   [:div.column.is-1]
+   [:div.column.is-half
+    [:nav.pagination
+     [:ul.pagination-list
+      (map #(cond
+             (nil? %)[:li [:span.pagination-ellipsis ".."]]
+             :else [:li {:key %} [:a.pagination-link
+                                  {:class (when (= % current) "is-current")
+                                   :href (linkFn %)} %]])
+           pagelist)]]]]))
 (defn kural-path-view [{pal :pal iyal :iyal adhikaram :adhikaram} id]
  (when-let [pal pal]
-  (let [path [pal iyal adhikaram id]]
-   [:div {:class (KURAL-PATH)}
-     [:span {:class (K-P-ITEM)} (cstr/join " > " path)]])))
+  (let [path [pal iyal adhikaram]]
+   [:nav.breadcrumb.is-small-mobile.mobile-font-size
+     [:ul
+      (map (fn [i] ^{:key i}[:li [:a {:href "#"} i]]) path)
+      [:li.is-active [:span {:style {:padding-left "0.5rem"}} id]]]])))
 
-(defn adi-view [n idx v]
-   [:span {:class (K-A-SEER (= idx 0)) :key (str "ad" idx n)} (cstr/join "/" v)])
+(defn oru-sol-1 [idx sol mudivuSol?]
+  (let [[sp ap] sol
+        seerfn (if mudivuSol? common/etru-seer common/asai-seer)]
+   [:div.has-background-white-bis {:key idx} [:span.has-text-weight-bold.has-text-black (cstr/join "/" sp)]
+    [:br]
+    [:span.is-italic (cstr/join "/" (map #((keyword %) common/asai) ap))]
+    [:br]
+    [:span.has-span.has-text-grey-dark.has-text-weight-bold (seerfn (map #(keyword %) ap))]]))
 
-(defn asai-view [n idx v]
-   [:span {:class (K-A-S-1 (= idx 0)) :key (str "as" idx n)} (cstr/join "/" (map #((keyword %) common/asai) v))])
+(defn oru-adi-1 [idx, adi mudivuAdi? solEnneekai]
+ (let [mudivuSol (when mudivuAdi? (dec (count adi)))
+       newadi (common/padding adi solEnneekai [[]])]
+    (map-indexed #(oru-sol-1 (str idx %1) %2 (= mudivuSol %1)) newadi)))
 
-(defn seer-view [n idx v]
- (let [sf (if (and (= n 1) (= idx 2)) common/etru-seer common/asai-seer)]
-   [:span {:class (K-A-S-1 (= idx 0)) :key (str "as" idx n)} (sf (map #(keyword %) v))]))
-
-(defn kural-view [data]
- (let [[n p clz pkey view] data
-       adi (get p n)]
-   [:div {:class (clz) :key (str pkey n)}
-       (map-indexed #(view n %1 %2) adi)]))
-
-(defn- k-v [x k]
- (map kural-view [[x (:sp k) K-ADI "" adi-view]
-                  [x (:ap k) K-ADI-1 "as" asai-view]
-                  [x (:ap k) K-ADI-2 "ser" seer-view]]))
-
-(defn kural-one [{k :padal id :id}]
-  [:div {:class (KURAL) :key id}
-    [:div {:class (KURAL-PATH-C)}
-          (kural-path-view k id)
-          (for [x (range (count (:sp k)))]
-              (k-v x k))]])
-
-(defn kural-adhikaram-list []
-  [:div {:class (KURALS)}
-    [:div {:class (KURAL-LIST)}
-      (let [klist @(re-frame/subscribe [::subs/get-kural])]
-         (map #(kural-one %1) klist))]])
-
-(defn adhikaram-href [value]
- (if (nil? value) "" (str "#/kural/" value)))
-
-(defn search-href [path value]
- (if (nil? path) "" (str "#/kural/s/" path "?p=" value)))
-
-(defn kural-pagination []
-  [:ul {:class (UL-P)}
-   (let [{pagination :pagination
-          searchPage :searchPage
-          searchPath :searchPath} @(re-frame/subscribe [::subs/get-pagination])
-         linkFn (if (nil? searchPage) adhikaram-href (partial search-href searchPath))
-         ul-li-p (UL-LI-P)
-         activeF (UL-LI-A-P false)
-         activeT (UL-LI-A-P true)
-         {current :current previous :previous
-           next :next pages :pages} pagination
-         pval (when previous (dec current))
-         nval (when next (inc current))
-         emptyPage? (not-empty pages)
-         litem (fn [value href & [label]]
-                 (if (nil? value) ""
-                  [:li {:class ul-li-p :key (or value label)}
-                   [:a {:class (if (= current value) activeT activeF) :href href} (or label value)]]))]
-        (concat [] [(when emptyPage? (litem pval (linkFn (or pval "#")) "«"))
-                    (map #(litem % (linkFn %)) pages)
-                    (when emptyPage? (litem nval (linkFn (or nval "#")) "»"))]))])
+(defn one-padal-1 [{padal :padal idx :id}]
+ (let [sp (:sp padal)
+       ap (:ap padal)
+       etruSeerIrrukku true
+       adikalEnneekai (count sp)
+       solEnneekai (apply max (map count sp))
+       mudivuAdiIdx (dec adikalEnneekai)
+       variakal (for [x (range adikalEnneekai)] (map vector (get sp x) (get ap x)))]
+  (when (not-empty sp)
+   [:article.message.is-info {:key  idx}
+     [:div.columns.is-mobile.is-gapless.is-marginless
+      [:div.column.is-1.is-hidden-400px]
+      [:div.column.is-four-fifths-tablet.is-half-desktop
+       [:div.message-header   [kural-path-view padal idx]]]
+      [:div.column.is-1.is-hidden-400px]]
+    [:div.message-body.is-paddingless.zero-border-width
+     [:div.columns.is-mobile.is-gapless
+      [:div.column.is-1.is-hidden-400px]
+      [:div.column.is-four-fifths-tablet.is-half-desktop.has-background-grey-lighter
+       [:div.grid
+        (map-indexed #(oru-adi-1 (str idx %1) %2 (= mudivuAdiIdx %1) solEnneekai) variakal)]]
+      [:div.column.is-1.is-hidden-400px]]]])))
 
 
+(defn kural-list-1 []
+ (let [klist @(re-frame/subscribe [::subs/get-kural])]
+  [:div.section.is-paddingless
+   (map #(one-padal-1 %) klist)]))
+
+;; home
 (defn home-panel []
- (let [pagination (kural-pagination)]
-  [:div
-    (header)
-    [:div {:style {:position "relative"}}
-     (kural-filter)
-     [:div {:class (UL-P-TOP)} pagination]]
-    [:div {:style {:position "relative"}}
-     (kural-adhikaram-list)
-     [:div {:class (UL-P-BOTTOM)} pagination]]]))
+ (let [{eruthiSeer :eruthiSeer padal :padal} @(re-frame/subscribe [::subs/get-init])
+       np [new-pagination padal]]
+  [:div.section.is-paddingless
+    [header]
+    [new-fitler eruthiSeer]
+    [filter-tags eruthiSeer]
+    (into [] np)
+    [kural-list-1]
+    (into [] np)]))
 
 
 ;; about
@@ -150,7 +211,6 @@
 (defn about-panel []
   [:div
    [:h1 "This is the About Page."]
-
    [:div
     [:a {:href "#/"}
      "go to Home Page"]]])

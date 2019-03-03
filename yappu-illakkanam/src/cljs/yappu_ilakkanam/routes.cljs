@@ -7,6 +7,7 @@
    [goog.history.EventType :as EventType]
    [re-frame.core :as re-frame]
    [yappu-ilakkanam.events :as events]
+   [yappu-ilakkanam.common :as common]
    [yappu-ilakkanam.subs :as subs]))
 
 
@@ -30,18 +31,20 @@
     (set-hash! "/kural/1"))
 
   ;; define routes here
-  (defroute "/kural/:aidx" [aidx]
-   (let [idx (js/parseInt (or (not-empty (clojure.string/join (re-seq #"\d+" aidx))) "1"))
-         sidx (cond (>= 0 idx) 1 :else (mod idx 134))]
-    (if (= sidx idx)
-     (re-frame/dispatch [::events/load-range-kural sidx])
-     (set-hash! (str "/kural/" sidx)))))
+  (defroute "/:padal/:aidx" [padal aidx]
+   (if (not (contains? common/avail padal)) (set-hash! "/kural/1")
+    (let [idx (js/parseInt (or (not-empty (clojure.string/join (re-seq #"\d+" aidx))) "1"))
+          sidx (cond (>= 0 idx) 1 :else (mod idx 134))]
+     (if (= sidx idx)
+      (re-frame/dispatch [::events/init-load-config sidx padal])
+      (set-hash! (str "/" padal "/" sidx))))))
 
   ;; define routes here
-  (defroute "/kural/s/*p" [p query-params]
-   (let [page (or (:p query-params) 1)]
-    (re-frame/dispatch [::events/search-kural p page]
-     (set-hash! (str "/kural/s/" p "?p=" page)))))
+  (defroute "/:padal/s/*p" [padal p query-params]
+   (if (not (contains? common/avail padal)) (set-hash! "/kural/1")
+    (let [page (or (:p query-params) 1)]
+     (re-frame/dispatch [::events/search-kural p page padal]
+      (set-hash! (str "/" padal "/s/" p "?p=" page))))))
 
   (defroute "/about" []
     (re-frame/dispatch [::events/set-active-panel :about-panel]))
