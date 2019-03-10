@@ -53,10 +53,14 @@
    (re-frame/->interceptor
      :id :kural-fetch
      :after (fn [context]
-              (let [fd (get-in context [:effects :db :fetchdata])
-                    httpeffects (map-indexed kural-req-effect fd)]
-               (if (not-empty httpeffects)
-                   (assoc-in context [:effects :http-xhrio] httpeffects)
+              (let [{fd :fetchdata init :in} (get-in context [:effects :db])
+                    [_ path page padal] (get-in context [:coeffects :event])
+                    httpeffects (map-indexed kural-req-effect fd)
+                    newhttpeffects (if (empty? init)
+                                    (concat [(init-load nil padal)] httpeffects)
+                                    httpeffects)]
+               (if (not-empty newhttpeffects)
+                   (assoc-in context [:effects :http-xhrio] newhttpeffects)
                    context)))))
 
 (def kural-filter-fetch
