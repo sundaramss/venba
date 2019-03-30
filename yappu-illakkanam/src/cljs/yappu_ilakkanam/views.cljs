@@ -136,11 +136,12 @@
    [:div.column.is-half
     [:nav.pagination
      [:ul.pagination-list
-      (map #(cond
-             (nil? %)[:li [:span.pagination-ellipsis ".."]]
-             :else [:li {:key %} [:a.pagination-link
-                                  {:class (when (= % current) "is-current")
-                                   :href (linkFn %)} %]])
+      (map (let [n (volatile! 1)]
+            #(cond
+               (nil? %)[:li {:key (str "pg" (vswap! n inc)) :id @n} [:span.pagination-ellipsis ".."]]
+               :else [:li {:key %} [:a.pagination-link
+                                    {:class (when (= % current) "is-current")
+                                     :href (linkFn %)} %]]))
            pagelist)]]]]))
 (defn kural-path-view [{pal :pal iyal :iyal adhikaram :adhikaram} id]
  (when-let [pal pal]
@@ -199,7 +200,7 @@
        np [new-pagination padal]]
   [:div.section.is-paddingless
     [header]
-    [new-fitler eruthiSeer]
+    (when eruthiSeer [new-fitler eruthiSeer])
     [filter-tags eruthiSeer]
     (into [] np)
     [kural-list-1]
