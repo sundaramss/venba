@@ -38,13 +38,24 @@
          sp  (sp-join val)
          ap  (ap-join val)
          kn  (op-join val)]
-     (println val)
      (assoc {} :sp sp :ap ap :kn kn :w word))))
 
-
+(vpspec/ta-asai "எழுத்தெல்லாம்")
 
 (ta-sol-asai "அம்மா")
 
 (ta-sol-asai "அஃது")
 
 (ta-sol-asai "அஃது" true)
+
+(defn get-kv [adi k]
+  (println (k adi))
+  (vec (map #(k %) adi)))
+
+(defn padal [{padal :padal iyal  :iyal adhikaram :adhikaram pal :pal ve :ve}]
+  (let [adikal (map #(ta-sol-asai %) (str/split (str/trim (first padal)) #" +"))
+        records {:sp [] :ap [] :op [] :iyal iyal :adihikaram adhikaram :pal pal :ve ve}
+        sprecs (update-in records [:sp] into (map #(:sp %) adikal))
+        aprecs (update-in sprecs [:ap] into (map #(:ap %) adikal))
+        oprecs (update-in aprecs [:op] into (map #(:kn %) adikal))]
+    oprecs))

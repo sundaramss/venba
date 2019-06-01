@@ -35,7 +35,7 @@
                        0x0BA9 ; ன
                        0x0BAA 0x0BAE ; ப ம
                        0x0BAF 0x0BB0 0x0BB1 ; ய ர ற
-                       0x0BB2 0x0BB3 0x0BB5 0x0BB5 ; ல ள ழ வ
+                       0x0BB2 0x0BB3 0x0BB4 0x0BB5 ; ல ள ழ வ
                        0x0BB7 0x0BB8 0x0BB9])) ; ஷ ஸ ஹ
 
 (defonce uyir-kuril (map  ta-char-str
@@ -169,7 +169,6 @@
 
 
 
-(s/confi)
 (s/explain-str (s/* (s/cat :f ::ta-first))  ["அ" "ஃ"])
 
 
@@ -205,13 +204,18 @@
   ([w] (ta-asai w false))
   ([w b] (let [fun (if b ta-kuril-agg-nedil  ta-kuril-nedil)
                 value (s/conform ::asai (fun w))]
-           (println value)
            (if (= ::s/invalid value) []
             (map (fn [[f val]] (into (conj [] f) (cleanup val))) value)))))
 
 
 
+(s/explain-str ::ta-split (seq "எழுத்தெல்லாம்"))
 
+(s/conform ::ta-K-N-O (ta-split "எழுத்தெல்லாம்"))
+
+(ta-kuril-nedil "எழுத்தெல்லாம்")
+
+(ta-asai "எழுத்தெல்லாம்")
 
 (ta-kuril-nedil "அம்மா")
 

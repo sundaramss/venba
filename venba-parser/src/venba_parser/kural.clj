@@ -1,6 +1,9 @@
 (ns venba-parser.kural
   (:require [venba-parser.common :as common]
             [venba-parser.yappu :as yappu]
+            [venba-parser.pa :as pa]
+            [clojure.spec.alpha :as s]
+            [clojure.data.csv :as csv]
             [clojure.string :as str]
             [clojure.set :as cset]
             [clojure.java.io :as io]))
@@ -133,7 +136,7 @@
                                           (cookup-search-data-val)
                                           (common/clj-to-json))))))
 (defn- write-search-result [asai result]
-  (common/make-dir (str "extra" "\\" asai "\\1.json"))
+  (common/make-dir (str "extra" "/" asai "/1.json"))
   (doseq [[seerid listValue] result]
     (common/write-venba  (str "extra/" asai "/" seerid ".json") (common/clj-to-json listValue))))
 
@@ -150,3 +153,36 @@
          result (reduce cookup-search-7data r lines)]
      (doseq [[key value] result]
          (write-search-result key value)))))
+
+(s/def ::kural-csv-rec (s/* (s/cat :ve string?
+                               :ave string?
+                               :pal string?
+                               :iyal string?
+                               :adhikaram string?
+                               :padal (s/* string?))))
+
+
+(defn kural-rec [arr]
+  (let [val (s/conform ::kural-csv-rec arr)]
+   (if (= val ::s/invalid) [] (first val))))
+
+
+(defn kural-write [data]
+  (let [wfile (str "./extra/" (:ve data) ".json")
+        recs (assoc data :sp (partition-all 4 (:sp data))
+                         :ap (partition-all 4 (:ap data))
+                         :op (partition-all 4 (:op data)))
+        json-data (common/clj-to-json (dissoc recs :ve))]
+    (spit wfile json-data)))
+
+(defn kural-data [filepath]
+ (with-open [reader (io/reader filepath)]
+    (let [data (csv/read-csv reader)]
+      (mapv
+         #(->> %
+           kural-rec
+           pa/padal)
+        data))))
+
+(defn kurals-write [filepath]
+    (mapv #(kural-write %) (kural-data filepath)))
