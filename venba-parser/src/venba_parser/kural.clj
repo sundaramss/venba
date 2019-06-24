@@ -184,9 +184,12 @@
 
 (defn kural-validate12 [result data]
    (let [seers (:seers data)
+         thalai (:thalai data)
          ve (:ve data)
-         seerUpdateResult (if (nil? seers) (update-in result [:seers-invalid] conj ve) result)]
-    seerUpdateResult))
+         seerUpdateResult (if (nil? seers) (update-in result [:seers-invalid] conj ve) result)
+         thalaiUpdateResult (if (nil? thalai) (update-in result [:thalais-invalid] conj ve) seerUpdateResult)]
+    (println (nil? thalai) thalai)
+    thalaiUpdateResult))
 
 (defn kural-data [filepath]
  (with-open [reader (io/reader filepath)]
@@ -203,7 +206,7 @@
 
 (defn kurals-validate [filepath]
    (println
-    (reduce #(kural-validate12 %1 %2) {:seers-invalid []} (kural-data filepath))))
+    (reduce #(kural-validate12 %1 %2) {:seers-invalid [] :thalais/invalid []} (kural-data filepath))))
 
 ; (def k1021 "1021,1,பொருட்பால்,குடியியல்,குடிசெயல்வகை, கருமம் செயஒருவன் கைதூவேன் என்னும்  பெருமையில் பீடுஉடையது இல்")
 

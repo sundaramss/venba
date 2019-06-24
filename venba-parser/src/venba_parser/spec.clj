@@ -300,8 +300,9 @@
           etru (:etru kuralSeers)
           fv (partition 2 1 (into seerkal [[:last etru]]))
           vthalai (s/conform ::ven-thalai fv)]
-      (if (= :s/invalid vthalai) nil
+      (if (= ::s/invalid vthalai) nil
           vthalai))))
 
+(venba-seers [[:NI :NE] [:NE :NE] [:NI :NE :NE] [:NE :NE] [:NI :NE] [:NI :NE] [:NI :NE]] 12)
 
-(venba-thalais (venba-seers [[:NI :NE] [:NI :NE] [:NI :NE :NE] [:NE :NE] [:NI :NE] [:NI :NE] [:NI :NE]] 12))
+(venba-thalais (venba-seers [[:NI :NE] [:NE :NE] [:NI :NE :NE] [:NE :NE] [:NI :NE] [:NI :NE] [:NI :NE]] 12))
