@@ -54,8 +54,12 @@
 
 (defn padal [{padal :padal iyal  :iyal adhikaram :adhikaram pal :pal ve :ve}]
   (let [adikal (map #(ta-sol-asai %) (str/split (str/trim (first padal)) #" +"))
-        records {:sp [] :ap [] :op [] :iyal iyal :adihikaram adhikaram :pal pal :ve ve}
+        records {:sp [] :ap [] :op [] :iyal iyal :adihikaram adhikaram :pal pal :ve ve :seers nil :thalai nil}
         sprecs (update-in records [:sp] into (map #(:sp %) adikal))
         aprecs (update-in sprecs [:ap] into (map #(:ap %) adikal))
-        oprecs (update-in aprecs [:op] into (map #(:kn %) adikal))]
-    oprecs))
+        oprecs (update-in aprecs [:op] into (map #(:kn %) adikal))
+        seerrecs (update oprecs :seers (vpspec/venba-seers (:ap oprecs) ve))]
+     seerrecs))
+       ; seerrecs (update-in oprecs [:seers] (vpspec/venba-seers (:ap oprecs)))
+       ; thalairecs (update-in oprecs [:thalai] (vpspec/venba-thalais (:seers seerrecs)))]
+    ;thalairecs))

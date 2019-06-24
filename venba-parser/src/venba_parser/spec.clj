@@ -186,12 +186,16 @@
 
 (s/def ::asai (s/* (s/alt :NE
                          (s/alt
+                          :f (s/& (s/cat :1 nedil? :2 ottru? :3 ottru?))
+                          :e (s/& (s/cat :1 kuril? :2 ottru? :3 ottru?))
                           :d (s/& (s/cat :1 nedil? :2 ottru?))
                           :c (s/& (s/cat :1 kuril? :2 ottru?))
                           :a (s/& (s/cat :1 nedil?))
                           :b (s/& (s/cat :1 kuril?)))
                        :NI
                         (s/alt
+                          :f (s/& (s/cat :1 kuril? :2 nedil? :3 ottru? :4 ottru?))
+                          :e (s/& (s/cat :1 kuril? :2 kuril? :3 ottru? :5 ottru?))
                           :d (s/& (s/cat :1 kuril? :2 nedil? :3 ottru?))
                           :c (s/& (s/cat :1 kuril? :2 kuril? :3 ottru?))
                           :a (s/& (s/cat :1 kuril? :2 nedil?))
@@ -229,3 +233,75 @@
                                  :ave (s/+ number?))))
 
 (s/explain-str ::kural-parse [1, "1"])
+
+
+(s/def ::ma-seer #{[:NE :NE] [:NI :NE]})
+(s/def ::vilam-seer #{[:NE :NI] [:NI :NI]})
+(s/def ::kai-seer #{[:NE :NE :NE] [:NI :NE :NE]
+                    [:NE :NI :NE] [:NI :NI :NE]})
+
+(s/def ::etru-seer #{[:NE :NE] [:NI :NE] [:NI] [:NE]})
+
+
+(s/def ::kural-seers (s/cat :seerkal (s/* (s/or :ma ::ma-seer :vilam ::vilam-seer :kai ::kai-seer))
+                         :etru ::etru-seer))
+
+(defn isFirstNeerai? [[_ [v _]]]
+  (= v :NI))
+
+(defn isFirstNeer?  [[_ [v _]]]
+  (= v :NE))
+
+(defn isMa? [[v _]]
+ (= v :ma))
+
+(defn isVilam? [[v _]]
+  (= v :vilam))
+
+(defn isKai? [[v _]]
+  (= v :kai))
+
+
+
+(s/conform ::kural-seers
+ [[:NI :NE][:NI :NI :NE][:NE :NE :NE][:NE :NE] [:NI :NI][:NE :NI :NE] [:NE]])
+
+(s/def ::ma-thalai? (s/cat :f isMa? :s isFirstNeerai?))
+(s/def ::vilam-thalai? (s/cat :f isVilam? :s isFirstNeer?))
+(s/def ::kai-thalai? (s/cat :f isKai? :s isFirstNeer?))
+(s/def ::ven-thalai (s/coll-of (s/or :m ::ma-thalai? :v ::vilam-thalai? :k ::kai-thalai?)))
+
+(s/conform ::ma-thalai? [[:ma [:NE :NE]] [:vilam [:NI :NI]]])
+(s/conform ::vilam-thalai? [[:vilam [:NI :NE]] [:ma [:NE :NE]]])
+(s/conform ::kai-thalai? [[:kai [:NI :NE :NE]] [:ma [:NE :NE]]])
+
+(s/conform ::ven-thalai [(list [:ma [:NI :NE]] [:kai [:NI :NI :NE]]) (list [:ma [:NI :NE]] [:kai [:NI :NI :NE]])])
+
+(def inp [[:NI :NE][:NI :NI :NE][:NE :NE :NE][:NE :NE] [:NI :NI][:NE :NI :NE] [:NE]])
+
+(let [v (s/conform ::kural-seers inp)
+      s (:seerkal v)
+      e (:etru v)
+      fv (into s [[:last e]])] fv)
+
+
+(:seerkal (s/conform ::kural-seers inp))
+
+(s/valid? ::ven-thalai (partition 2 1 (:seerkal (s/conform ::kural-seers inp))))
+
+(defn venba-seers [parr ve]
+  (let [k (s/conform ::kural-seers parr)
+        k? (= ::s/invalid k)]
+   (if k? nil k)))
+
+(defn venba-thalais [kuralSeers]
+  (if (nil? kuralSeers) nil
+    (let [seerkal (:seerkal kuralSeers)
+          etru (:etru kuralSeers)
+          fv (partition 2 1 (into seerkal [[:last etru]]))
+          vthalai (s/conform ::ven-thalai fv)]
+      (if (= :s/invalid vthalai) nil
+          vthalai))))
+
+
+(venba-thalais (venba-seers [[:NI :NE] [:NI :NE] [:NI :NE :NE] [:NE :NE] [:NI :NE] [:NI :NE] [:NI :NE]] 12))
