@@ -6,6 +6,7 @@
             [clojure.data.csv :as csv]
             [clojure.string :as str]
             [clojure.set :as cset]
+            [clojure.core.async :refer [chan take! put! <!! >!! <! >! onto-chan pipeline pipeline-async pipeline-blocking] :as async]
             [clojure.java.io :as io]))
 
 (defn parse-kural-record [kurlrec]
@@ -173,8 +174,8 @@
                          :ap (partition-all 4 (:ap data))
                          :op (partition-all 4 (:op data)))
         json-data (common/clj-to-json (dissoc recs :ve))]
-    (println (:ap data))
-    (spit wfile json-data)))
+    (spit wfile json-data)
+    (:ve data)))
 
 ;(defn kural-validate1 [result data]
 ;   (let [[seers :seers thalai :thalai ve :ve] data
@@ -188,7 +189,6 @@
          ve (:ve data)
          seerUpdateResult (if (nil? seers) (update-in result [:seers-invalid] conj ve) result)
          thalaiUpdateResult (if (nil? thalai) (update-in result [:thalais-invalid] conj ve) seerUpdateResult)]
-    (println (nil? thalai) thalai)
     thalaiUpdateResult))
 
 (defn kural-data [filepath]
@@ -212,8 +212,41 @@
 
 ;  ["1021","1","பொருட்பால்","குடியியல்","குடிசெயல்வகை" "கருமம்" "செயஒருவன்" "கைதூவேன்" "என்னும்"  "பெருமையில்" "பீடுஉடையது" "இல்"])
 
-;(->>
+(->>
 ;   ["1021","1","பொருட்பால்","குடியியல்","குடிசெயல்வகை" "கருமம் செயஒருவன் கைதூவேன் என்னும்  பெருமையில் பீடுடைய தில்"])
-;  (kural-rec)
-;  (pa/padal)
-;  (:ap))
+   (str/split
+    "22,2,அறத்துப்பால்,பாயிரம் ,நீத்தார் பெருமை, துறந்தார் பெருமை துணைக்கூறின் வையத்து இறந்தாரை எண்ணிக்கொண் டற்று"
+    #",")
+  (kural-rec)
+  (pa/padal)
+  (:seers))
+
+(defn kural-rec-chan [arr]
+  (let [val (s/conform ::kural-csv-rec arr)]
+    (if (= val ::s/invalid) [] (first val))))
+
+(defn kural-pa-chan [arr]
+  (dissoc (pa/padal arr) :seers :thalai))
+
+(defn kural-write-chan [data]
+    (kural-write data))
+
+(defn kurals-write-parallel [filepath]
+    (let [raw-in (let [c (chan 1024)]
+                   (async/go
+                    (with-open [reader (io/reader filepath)]
+                      ;(doseq [data (line-seq reader)])
+                      (doseq [data (csv/read-csv reader)]
+                       (put! c data)))
+                    (async/close! c))
+                   c)
+           kural-out-in (chan 1024)
+           pa-out-in (chan 1024)
+           out (chan 1024)]
+     ;(onto-chan raw-in (range 10))
+     ;(pipeline-blocking 1 out (map identity) raw-in)
+     (pipeline-blocking 16 kural-out-in (map kural-rec-chan) raw-in)
+     (pipeline-blocking 25 pa-out-in (map kural-pa-chan) kural-out-in)
+     (pipeline-blocking 32 out (map kural-write-chan) pa-out-in)
+      ;(pipeline-async 2 out kural-write-chan pa-in)
+     (async/into [] out)))

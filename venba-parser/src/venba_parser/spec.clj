@@ -289,7 +289,7 @@
 
 (s/valid? ::ven-thalai (partition 2 1 (:seerkal (s/conform ::kural-seers inp))))
 
-(defn venba-seers [parr ve]
+(defn venba-seers [parr]
   (let [k (s/conform ::kural-seers parr)
         k? (= ::s/invalid k)]
    (if k? nil k)))
@@ -303,6 +303,6 @@
       (if (= ::s/invalid vthalai) nil
           vthalai))))
 
-(venba-seers [[:NI :NE] [:NE :NE] [:NI :NE :NE] [:NE :NE] [:NI :NE] [:NI :NE] [:NI :NE]] 12)
+(venba-seers [[:NI :NE] [:NE :NE] [:NI :NE :NE] [:NE :NE] [:NI :NE] [:NI :NE] [:NI :NE]])
 
-(venba-thalais (venba-seers [[:NI :NE] [:NE :NE] [:NI :NE :NE] [:NE :NE] [:NI :NE] [:NI :NE] [:NI :NE]] 12))
+(venba-thalais (venba-seers [[:NI :NE] [:NE :NE] [:NI :NE :NE] [:NE :NE] [:NI :NE] [:NI :NE] [:NI :NE]]))

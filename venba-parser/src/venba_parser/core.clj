@@ -1,6 +1,7 @@
 (ns venba-parser.core
-  (:require [venba-parser.kural :as kural])
+  (:require [venba-parser.kural :as kural]
             ;[clojure.spec.alpha :as s])
+            [clojure.core.async :refer [<!!] :as async])
   (:gen-class))
 
 (def k1 "1,1,அறத்துப்பால்,பாயிரம் ,கடவுள் வாழ்த்து, அகர முதல எழுத்தெல்லாம் ஆதி  பகவன் முதற்றே உலகு")
@@ -15,8 +16,9 @@
   ;(println (kural/kural-rec [1304 4 "காமத்துப்பால்" "கற்பியல் புலவி" "ஊடி" "யவரை" "உணராமை" "வாடிய" "வள்ளி" "முதலரிந்" "தற்று"])))
   ;(kural/kural-write-search-data-val "../data/kural.csv"))
   ; (kural/kural-write-search-7data-val "../data/kural.csv"))
-  ; (kural/kurals-write "../data/kural.csv")
-  (kural/kurals-validate "../data/kural.csv"))
+  ;(time (kural/kurals-write "../data/kural.csv")))
+  (time (<!! (kural/kurals-write-parallel "../data/kural.csv"))))
+  ; (kural/kurals-validate "..\\data\\kural.csv"))
   ;(kural/prepare-json-kural-extra k42))
   ;(kural/kural-extra-data-setup "../data/kural.csv"))
   ;(kural/kural-data-setup "../data/kural.csv"))

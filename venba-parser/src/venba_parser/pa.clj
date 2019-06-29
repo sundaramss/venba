@@ -58,7 +58,7 @@
         sprecs (update-in records [:sp] into (map #(:sp %) adikal))
         aprecs (update-in sprecs [:ap] into (map #(:ap %) adikal))
         oprecs (update-in aprecs [:op] into (map #(:kn %) adikal))
-        seerrecs (assoc oprecs :seers (vpspec/venba-seers (:ap oprecs) ve))
+        seerrecs (assoc oprecs :seers (vpspec/venba-seers (:ap oprecs)))
         thalairecs (assoc seerrecs :thalai (vpspec/venba-thalais (:seers seerrecs)))]
      thalairecs))
        ; seerrecs (update-in oprecs [:seers] (vpspec/venba-seers (:ap oprecs)))
