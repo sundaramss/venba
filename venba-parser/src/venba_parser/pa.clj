@@ -52,15 +52,23 @@
   (println (k adi))
   (vec (map #(k %) adi)))
 
-(defn padal [{padal :padal iyal  :iyal adhikaram :adhikaram pal :pal ve :ve}]
-  (let [adikal (map #(ta-sol-asai %) (str/split (str/trim (first padal)) #" +"))
+(defn padal
+ ([p] (padal p false))
+ ([{padal :padal iyal  :iyal adhikaram :adhikaram pal :pal ve :ve} lookAytha]
+  (let [adikal (map #(ta-sol-asai % lookAytha) (str/split (str/trim (first padal)) #" +"))
         records {:sp [] :ap [] :op [] :iyal iyal :adihikaram adhikaram :pal pal :ve ve :seers nil :thalai nil}
         sprecs (update-in records [:sp] into (map #(:sp %) adikal))
         aprecs (update-in sprecs [:ap] into (map #(:ap %) adikal))
         oprecs (update-in aprecs [:op] into (map #(:kn %) adikal))
         seerrecs (assoc oprecs :seers (vpspec/venba-seers (:ap oprecs)))
         thalairecs (assoc seerrecs :thalai (vpspec/venba-thalais (:seers seerrecs)))]
-     thalairecs))
+     thalairecs)))
        ; seerrecs (update-in oprecs [:seers] (vpspec/venba-seers (:ap oprecs)))
        ; thalairecs (update-in oprecs [:thalai] (vpspec/venba-thalais (:seers seerrecs)))]
     ;thalairecs))
+
+(defn thalais-explain-str [result]
+     (vpspec/venba-thalais-error (:seers result)))
+
+(defn isAytha? [value]
+  (some vpspec/isAytha? (seq value)))

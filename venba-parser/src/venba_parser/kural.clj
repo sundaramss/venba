@@ -189,6 +189,7 @@
          ve (:ve data)
          seerUpdateResult (if (nil? seers) (update-in result [:seers-invalid] conj ve) result)
          thalaiUpdateResult (if (nil? thalai) (update-in result [:thalais-invalid] conj ve) seerUpdateResult)]
+    (when (nil? thalai) (println (pa/thalais-explain-str result)))
     thalaiUpdateResult))
 
 (defn kural-data [filepath]
@@ -200,33 +201,50 @@
            pa/padal)
         data))))
 
+(defn kural-data-validate [filepath]
+ (with-open [reader (io/reader filepath)]
+    (let [data (csv/read-csv reader)]
+      (mapv
+         #(->> %
+           kural-rec
+           padal)
+        data))))
+
 (defn kurals-write [filepath]
     (mapv #(kural-write %) (kural-data filepath)))
 
+(defn padal [recs]
+ (let [p (pa/padal recs)
+       thalaiExists (:thalai p)
+       ve (:ve recs)
+       isAytha (pa/isAytha? (first (:padal recs)))]
+   (if (and (nil? thalaiExists) isAytha) (pa/padal recs true) p)))
 
 (defn kurals-validate [filepath]
    (println
-    (reduce #(kural-validate12 %1 %2) {:seers-invalid [] :thalais/invalid []} (kural-data filepath))))
+    (reduce #(kural-validate12 %1 %2) {:seers-invalid [] :thalais-invalid []} (kural-data-validate filepath))))
 
 ; (def k1021 "1021,1,பொருட்பால்,குடியியல்,குடிசெயல்வகை, கருமம் செயஒருவன் கைதூவேன் என்னும்  பெருமையில் பீடுஉடையது இல்")
 
 ;  ["1021","1","பொருட்பால்","குடியியல்","குடிசெயல்வகை" "கருமம்" "செயஒருவன்" "கைதூவேன்" "என்னும்"  "பெருமையில்" "பீடுஉடையது" "இல்"])
-
+; "22,2,அறத்துப்பால்,பாயிரம் ,நீத்தார் பெருமை, துறந்தார் பெருமை துணைக்கூறின் வையத்து இறந்தாரை எண்ணிக்கொண் டற்று"))
 (->>
 ;   ["1021","1","பொருட்பால்","குடியியல்","குடிசெயல்வகை" "கருமம் செயஒருவன் கைதூவேன் என்னும்  பெருமையில் பீடுடைய தில்"])
    (str/split
-    "22,2,அறத்துப்பால்,பாயிரம் ,நீத்தார் பெருமை, துறந்தார் பெருமை துணைக்கூறின் வையத்து இறந்தாரை எண்ணிக்கொண் டற்று"
+     "1181,1,காமத்துப்பால்,கற்பியல்,பசப்புறுபருவரல், நயந்தவர் நல்காமை நேர்ந்தேன் பசந்தவென்  பண்பியார்க் குரைக்கோ பிற"
+     ;"291,1,அறத்துப்பால்,துறவறவியல்,வாய்மை, வாய்மை எனப்படுவ தியாதெனின் யாதொன்றந் தீமை யிலாத சொலல்"
     #",")
   (kural-rec)
-  (pa/padal)
-  (:seers))
+  (padal))
+  ;(pa/padal)
+  ;(:seers))
 
 (defn kural-rec-chan [arr]
   (let [val (s/conform ::kural-csv-rec arr)]
     (if (= val ::s/invalid) [] (first val))))
 
 (defn kural-pa-chan [arr]
-  (dissoc (pa/padal arr) :seers :thalai))
+  (dissoc (padal arr) :seers :thalai))
 
 (defn kural-write-chan [data]
     (kural-write data))
@@ -250,3 +268,6 @@
      (pipeline-blocking 32 out (map kural-write-chan) pa-out-in)
       ;(pipeline-async 2 out kural-write-chan pa-in)
      (async/into [] out)))
+
+
+(pa/isAytha? "அஃதிலார்க்கு")

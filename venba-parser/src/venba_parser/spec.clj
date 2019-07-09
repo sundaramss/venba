@@ -303,6 +303,18 @@
       (if (= ::s/invalid vthalai) nil
           vthalai))))
 
+(defn venba-thalais-error [kuralSeers]
+  (if (nil? kuralSeers) nil
+    (let [seerkal (:seerkal kuralSeers)
+          etru (:etru kuralSeers)
+          fv (partition 2 1 (into seerkal [[:last etru]]))
+          vthalai (s/explain-str ::ven-thalai fv)]
+      vthalai)))
+
 (venba-seers [[:NI :NE] [:NE :NE] [:NI :NE :NE] [:NE :NE] [:NI :NE] [:NI :NE] [:NI :NE]])
 
 (venba-thalais (venba-seers [[:NI :NE] [:NE :NE] [:NI :NE :NE] [:NE :NE] [:NI :NE] [:NI :NE] [:NI :NE]]))
+
+
+(defn isAytha? [c]
+  (= (first ayitha) c))
