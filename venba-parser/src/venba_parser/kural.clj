@@ -6,7 +6,7 @@
             [clojure.data.csv :as csv]
             [clojure.string :as str]
             [clojure.set :as cset]
-            [clojure.core.async :refer [chan take! put! <!! >!! <! >! onto-chan pipeline pipeline-async pipeline-blocking] :as async]
+            [clojure.core.async :refer [mult tap merge chan take! put! <!! >!! <! >! onto-chan pipeline pipeline-async pipeline-blocking] :as async]
             [clojure.java.io :as io]))
 
 (defn parse-kural-record [kurlrec]
@@ -231,11 +231,12 @@
 (->>
 ;   ["1021","1","பொருட்பால்","குடியியல்","குடிசெயல்வகை" "கருமம் செயஒருவன் கைதூவேன் என்னும்  பெருமையில் பீடுடைய தில்"])
    (str/split
-     "1181,1,காமத்துப்பால்,கற்பியல்,பசப்புறுபருவரல், நயந்தவர் நல்காமை நேர்ந்தேன் பசந்தவென்  பண்பியார்க் குரைக்கோ பிற"
+     "1014,4,பொருட்பால்,குடியியல்,நாணுடைமை, அணியன்றோ நாணுடைமை சான்றோர்க் கஃதின்றேல் பிணியன்றோ பீடு நடை"
      ;"291,1,அறத்துப்பால்,துறவறவியல்,வாய்மை, வாய்மை எனப்படுவ தியாதெனின் யாதொன்றந் தீமை யிலாத சொலல்"
     #",")
   (kural-rec)
   (padal))
+  ;(pa/thalais-explain-str))
   ;(pa/padal)
   ;(:seers))
 
@@ -249,6 +250,32 @@
 (defn kural-write-chan [data]
     (kural-write data))
 
+(defn calculate-freq [result arr pano]
+  (let [number-asai (map-indexed (fn [i v] [(inc i) v]) arr)]
+   (reduce (fn [r v]
+             (let [f (first v) l (last v)]
+               (update-in r [l] (fn [x y z] (update-in x [y] conj z)) f pano)))
+     result number-asai)))
+
+(println (calculate-freq {[:NI] {1 '(43)}, [:NE :NI] {2 '(43)}} [[:NI] [:NE :NE]] 100))
+
+(defn kural-calculate [frequencyMap]
+   (fn [data]
+    (let [ve (:ve data) ap (:ap data)]
+     (reset! frequencyMap (calculate-freq @frequencyMap ap ve))
+     true)))
+
+(defn- write-frequency-result [asai result]
+ (let [mainKey (apply str (map name asai))]
+  (doseq [[seerid listValue] result]
+   (let [file-name (str "s/" mainKey "/" seerid ".json")]
+    (io/make-parents file-name)
+    (common/write-venba file-name (common/clj-to-json (reverse listValue)))))))
+
+(defn write-frequency [frequencyMap]
+  (doseq [[k v] frequencyMap]
+     (write-frequency-result k v)))
+
 (defn kurals-write-parallel [filepath]
     (let [raw-in (let [c (chan 1024)]
                    (async/go
@@ -258,16 +285,29 @@
                        (put! c data)))
                     (async/close! c))
                    c)
+           frequencyMap (atom {})
+           k-calculate (kural-calculate frequencyMap)
            kural-out-in (chan 1024)
            pa-out-in (chan 1024)
-           out (chan 1024)]
+           m (mult pa-out-in)
+           write-tap (chan 1024)
+           calc-tap (chan 1024)
+           out1 (chan 1024)
+           out2 (chan 1024)
+           out (merge [out1 out2] 1024)]
+     (tap m write-tap)
+     (tap m calc-tap)
      ;(onto-chan raw-in (range 10))
      ;(pipeline-blocking 1 out (map identity) raw-in)
      (pipeline-blocking 16 kural-out-in (map kural-rec-chan) raw-in)
      (pipeline-blocking 25 pa-out-in (map kural-pa-chan) kural-out-in)
-     (pipeline-blocking 32 out (map kural-write-chan) pa-out-in)
+     ;(pipeline-blocking 32 out1 (map kural-write-chan) pa-out-in)
+     (pipeline-blocking 32 out1 (map kural-write-chan) write-tap)
+     (pipeline-blocking 5 out2 (map k-calculate) calc-tap)
       ;(pipeline-async 2 out kural-write-chan pa-in)
-     (async/into [] out)))
+     (<!! (async/into [] out))
+     ;(println (map keys (vals @frequencyMap)))))
+     (write-frequency @frequencyMap)))
 
 
 (pa/isAytha? "அஃதிலார்க்கு")

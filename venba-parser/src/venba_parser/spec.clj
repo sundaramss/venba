@@ -308,7 +308,9 @@
     (let [seerkal (:seerkal kuralSeers)
           etru (:etru kuralSeers)
           fv (partition 2 1 (into seerkal [[:last etru]]))
-          vthalai (s/explain-str ::ven-thalai fv)]
+          vthalai (s/explain-data ::ven-thalai fv)
+          index (get-in (first (::s/problems vthalai)) [:in 0])]
+      (println (nth (get-in vthalai [::s/value]) index))
       vthalai)))
 
 (venba-seers [[:NI :NE] [:NE :NE] [:NI :NE :NE] [:NE :NE] [:NI :NE] [:NI :NE] [:NI :NE]])

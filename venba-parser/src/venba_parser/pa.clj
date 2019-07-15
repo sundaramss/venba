@@ -56,7 +56,7 @@
  ([p] (padal p false))
  ([{padal :padal iyal  :iyal adhikaram :adhikaram pal :pal ve :ve} lookAytha]
   (let [adikal (map #(ta-sol-asai % lookAytha) (str/split (str/trim (first padal)) #" +"))
-        records {:sp [] :ap [] :op [] :iyal iyal :adihikaram adhikaram :pal pal :ve ve :seers nil :thalai nil}
+        records {:sp [] :ap [] :op [] :iyal iyal :adhikaram adhikaram :pal pal :ve ve :seers nil :thalai nil}
         sprecs (update-in records [:sp] into (map #(:sp %) adikal))
         aprecs (update-in sprecs [:ap] into (map #(:ap %) adikal))
         oprecs (update-in aprecs [:op] into (map #(:kn %) adikal))
