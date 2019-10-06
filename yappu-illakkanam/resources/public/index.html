@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=.5, maximum-scale=12.0, minimum-scale=.25, user-scalable=yes"/>
+  <title>Yappu</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" />
+  <!-- link rel="stylesheet" href="css/bulma.min.css"/ -->
+  <!-- link rel="stylesheet" href="css/font-awesome.css"/ -->
+  <link rel="stylesheet" href="css/app.css"/>
+  <!--link rel="stylesheet" href="css/debug.css"/-->
+  <style>
+    .is-margin-left {
+      margin-left: 1rem;
+    }
+    .grid > div {
+      display: table-cell;
+      vertical-align: top;
+    }
+    .grid {
+      padding: 2px 2px;
+      display: grid;
+      grid-gap: 1px;
+      grid-template-columns: repeat(4, auto);
+      width: 100%;
+    }
+    .grid > div {
+      padding: 10px;
+      font-size: 0.8rem;
+    }
+    .zero-border-width {
+      border-width: 0px;
+    }
+    @media screen and (min-width: 0px) and (max-width: 414px) {
+      .is-hidden-400px {
+        display: none!important;
+      }
+      .grid > div {
+        padding: 5px;
+        font-size: 0.6rem;
+      }
+      .mobile-font-size {
+        font-size: 0.6rem!important;
+      }
+    }
+    @media screen and (min-width: 414px) {
+      .is-hidden_mobile {
+          display: none!important;
+      }
+    }
+    @media screen and (min-width: 1024px) {
+      .grid > div {
+        font-size: 1rem;
+      }
+    }
+  </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="js/compiled/app.js"></script>
+  </body>
+</html>
