@@ -1,16 +1,14 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset='utf-8'>
-    <meta name="viewport" content="width=device-width, initial-scale=.5, maximum-scale=12.0, minimum-scale=.25, user-scalable=yes"/>
+    <meta charset='utf-8' />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=12.0, minimum-scale=.25, user-scalable=1" />
+	<meta http-equiv="X-UA-Compatible" content="IE=11" />
   <title>Yappu</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" />
-  <!-- link rel="stylesheet" href="css/bulma.min.css"/ -->
-  <!-- link rel="stylesheet" href="css/font-awesome.css"/ -->
-  <link rel="stylesheet" href="css/app.css"/>
-  <!--link rel="stylesheet" href="css/debug.css"/-->
-  <style>
+  <link rel="stylesheet" href="css/app.css" />
+  <style type="text/css" rel="stylesheet">
     .is-margin-left {
       margin-left: 1rem;
     }
@@ -32,9 +30,10 @@
     .zero-border-width {
       border-width: 0px;
     }
-    @media screen and (min-width: 0px) and (max-width: 414px) {
+    @media only screen and (min-width: 0px) and (max-width: 414px) {
       .is-hidden-400px {
         display: none!important;
+        background-color: blue;
       }
       .grid > div {
         padding: 5px;
@@ -55,6 +54,7 @@
       }
     }
   </style>
+
   </head>
   <body>
     <div id="app"></div>
