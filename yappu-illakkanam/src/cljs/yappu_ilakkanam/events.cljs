@@ -37,7 +37,7 @@
 
 (defn- prepare-filters [paths]
   (let [filters (apply intersection (map :frecords paths))]
-     (vec (partition 10 filters))))
+     (vec (partition-all 10 filters))))
 
 (defn- preparePagination [cid end]
   (let [current (refinedCID cid end)]
@@ -86,10 +86,11 @@
      (if (= selseerid prevseerid) db
        (let [seers (get-in db [:config selseerid])
              seerlist  (map #(conj [] % (get seerkal %)) seers)
+             prevseer (get-in db [:selected :selseer])
              defaultValue (get seerkal (first seers))]
         (-> db
          (assoc-in [:selected :seerlist] seerlist)
-         (assoc-in [:selected :selseer] defaultValue))))))
+         (assoc-in [:selected :selseer] (or prevseer defaultValue)))))))
 
 (re-frame/reg-event-db
  ::initialize-db

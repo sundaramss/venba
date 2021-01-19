@@ -73,7 +73,8 @@
       {:on-click #(helper/get-remove-filter-url id)}]]]))
 
 (defn filter-tags []
- (let [opts (helper/get-seleted-opts)]
+ (let [eruthiSeerIdx @(re-frame/subscribe [::subs/get-eruthi-seer])
+       opts (if (= eruthiSeerIdx 0) [] (helper/get-seleted-opts))]
   [:div.columns.is-gapless
    [:div.column.is-1]
    [:div.column.is-four-fifths
