@@ -1,6 +1,7 @@
 (ns yappu-ilakkanam.core
   (:require
    [reagent.core :as reagent]
+   [reagent.dom :as reagentDom]
    [re-frame.core :as re-frame]
    [yappu-ilakkanam.events :as events]
    [yappu-ilakkanam.routes :as routes]
@@ -14,7 +15,7 @@
 
 (defn ^:dev/after-load mount-root []
   (re-frame/clear-subscription-cache!)
-  (reagent/render [views/main-panel]
+  (reagentDom/render [views/main-panel]
                   (.getElementById js/document "app")))
 
 (defn init []
