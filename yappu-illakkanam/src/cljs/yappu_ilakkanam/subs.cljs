@@ -50,6 +50,11 @@
    (get-in db [:selected :seerlist])))
 
 (re-frame/reg-sub
+  ::get-seer-selseerid
+ (fn [db [_]]
+   (get-in db [:selected :selseerid])))
+
+(re-frame/reg-sub
   ::get-selected
  (fn [db [_]]
    (get-in db [:selected])))

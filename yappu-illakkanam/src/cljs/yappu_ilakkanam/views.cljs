@@ -34,6 +34,19 @@
       [:span {:aria-hidden "true"}]
       [:span {:aria-hidden "true"}]]]])))
 
+(defn- select-seer-no []
+  (let [eruthiSeer (+ @(re-frame/subscribe [::subs/get-eruthi-seer]) 1)
+        selseerid @(re-frame/subscribe [::subs/get-seer-selseerid])]
+    (println ">>>>>" selseerid)
+    [:div.select.is-rounded.is-size-7-mobile
+                 [:select {:value selseerid :on-change #(re-frame/dispatch [::events/set-seer-id-selection (js/parseInt (.. % -target -value))])}
+                  [:option {:value 1} "சீர் - 1"]
+                  (for [x (range 2 eruthiSeer)]
+                     ^{:key x}[:option {:value x } (str "சீர் - " x)])]
+                 [:span.icon.is-small.is-left [:i.fa.fa-list-ol]]]
+  ))
+
+
 (defn new-fitler []
     [:div.is-vcentered.columns.is-gapless
      [:div.column.is-1]
@@ -46,12 +59,7 @@
        [:div.column
          [:div.field.has-addons
            [:div.control.has-icons-left
-              [:div.select.is-rounded.is-size-7-mobile
-               [:select {:defaultValue 1 :on-change #(re-frame/dispatch [::events/set-seer-id-selection (js/parseInt (.. % -target -value))])}
-                [:option {:value 1} "சீர் - 1"]
-                (for [x (range 2 (+ @(re-frame/subscribe [::subs/get-eruthi-seer]) 1))]
-                   ^{:key x}[:option {:value x} (str "சீர் - " x)])]
-               [:span.icon.is-small.is-left [:i.fa.fa-list-ol]]]]
+              [select-seer-no]]
            [:div.control.has-icons-left
              [:div.select.is-rounded.is-size-7-mobile
                [:select {:on-change #(re-frame/dispatch [::events/set-seer-selection (.. % -target -value)])}

@@ -82,15 +82,20 @@
             {:when :seen? :events ::failure-config :halt? true}]}))
 
 (defn- prepare-seers-list [db selseerid]
-  (let [prevseerid (get-in db [:selected :selseerid])]
+  (let [prevseerid (get-in db [:selected :selseerid])
+        lastSeer (get-in db [:config :eruthiSeer])]
      (if (= selseerid prevseerid) db
-       (let [seers (get-in db [:config selseerid])
+       (let [seerSymbol (if (= lastSeer selseerid) :etruSeer :asaiSeer)
+             seers (get-in db [:config seerSymbol])
              seerlist  (map #(conj [] % (get seerkal %)) seers)
              prevseer (get-in db [:selected :selseer])
+             isLastSelSeer (= selseerid lastSeer)
+             isLastPrevSelSeer (= prevseerid lastSeer)
              defaultValue (get seerkal (first seers))]
         (-> db
          (assoc-in [:selected :seerlist] seerlist)
-         (assoc-in [:selected :selseer] (or prevseer defaultValue)))))))
+         (assoc-in [:selected :selseer] (if (or isLastSelSeer isLastPrevSelSeer)
+                                            defaultValue (or prevseer defaultValue))))))))
 
 (re-frame/reg-event-db
  ::initialize-db
@@ -116,7 +121,7 @@
  (fn-traced [db [_ res]]
    (-> db
      (assoc :config res)
-     (prepare-seers-list :asaiSeer)
+     (prepare-seers-list 1)
      (assoc-in [:selected :selseerid] 1))))
 
 (re-frame/reg-event-db
@@ -188,7 +193,7 @@
     (let [eruthiSeer (get-in db [:config :eruthiSeer])
           selseerid (if (= eruthiSeer id) :etruSeer :asaiSeer)]
       (-> db
-        (prepare-seers-list selseerid)
+        (prepare-seers-list id)
         (assoc-in [:selected :selseerid] id)))))
 
 (re-frame/reg-event-db
